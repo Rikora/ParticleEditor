@@ -5,15 +5,26 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <SFML/Window/Event.hpp>
+#include <Thor/Math.hpp>
 
 namespace px
 {
-	Application::Application() : m_window(sf::VideoMode(800U, 600U), "Particle Editor", sf::Style::Close,
-										  sf::ContextSettings(0U, 0U, 8U)), m_shape(50.f)
+	Application::Application() : m_window(sf::VideoMode(1200U, 800U), "Particle Editor", sf::Style::Close,
+										  sf::ContextSettings(0U, 0U, 8U))
 	{
 		m_window.setVerticalSyncEnabled(true);
 		ImGui::SFML::Init(m_window);
-		m_shape.setFillColor(sf::Color::Green);
+
+		// Load texture
+		m_particleTexture.loadFromFile("src/res/textures/particle.png");
+		m_particleSystem.setTexture(m_particleTexture);
+
+		// Prepare the particle emitter
+		m_emitter.setEmissionRate(10);
+		m_emitter.setParticleLifetime(sf::seconds(2.f));
+		m_emitter.setParticlePosition(thor::Distributions::circle(sf::Vector2f(300.f, 200.f), 50.f));
+		m_emitter.setParticleScale(sf::Vector2f(0.05f, 0.05f));
+		m_particleSystem.addEmitter(m_emitter);
 	}
 
 	Application::~Application()
@@ -36,6 +47,7 @@ namespace px
 	void Application::update(sf::Time dt)
 	{
 		ImGui::SFML::Update(m_window, dt);
+		m_particleSystem.update(dt);
 	}
 
 	void Application::updateGUI()
@@ -51,7 +63,7 @@ namespace px
 	void Application::render()
 	{
 		m_window.clear();
-		m_window.draw(m_shape);
+		m_window.draw(m_particleSystem);
 		ImGui::SFML::Render(m_window);
 		m_window.display();
 	}
@@ -64,7 +76,7 @@ namespace px
 		{
 			pollEvents();
 			update(clock.restart());
-			updateGUI();
+			//updateGUI();
 			render();
 		}
 	}

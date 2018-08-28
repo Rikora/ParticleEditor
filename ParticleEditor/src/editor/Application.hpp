@@ -4,6 +4,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Graphics.hpp>
+#include <Thor/Particles.hpp>
 
 namespace px
 {
@@ -24,6 +25,8 @@ namespace px
 
 	private:
 		sf::RenderWindow m_window;
-		sf::CircleShape m_shape;
+		sf::Texture m_particleTexture;
+		thor::ParticleSystem m_particleSystem;
+		thor::UniversalEmitter m_emitter;
 	};
 }
