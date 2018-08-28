@@ -29,14 +29,18 @@ namespace px
 		{
 			float nrOfParticles = 1.f;
 			float rotation = 0.f;
-			sf::Vector2f position = sf::Vector2f(600.f, 400.f);
-			sf::Vector2f scale = sf::Vector2f(1.f, 1.f);
 			float lifetime = 1.f;
+			float radius = 1.f;
+			sf::Vector2f halfSize = sf::Vector2f(1.f, 1.f);
+			sf::Vector2f position = sf::Vector2f(400.f, 400.f);
+			sf::Vector2f scale = sf::Vector2f(1.f, 1.f);
 		};
 
 	private:
 		sf::RenderWindow m_window;
 		sf::Texture m_particleTexture;
+		sf::Sprite m_textureButton;
+		sf::BlendMode m_blendMode;
 		thor::ParticleSystem m_particleSystem;
 		thor::UniversalEmitter m_emitter;
 		Properties m_particle;

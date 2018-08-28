@@ -7,6 +7,8 @@
 #include <SFML/Window/Event.hpp>
 #include <Thor/Math.hpp>
 
+#define IM_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
+
 namespace px
 {
 	Application::Application() : m_window(sf::VideoMode(1200U, 800U), "Particle Editor", sf::Style::Close,
@@ -17,6 +19,7 @@ namespace px
 
 		// Load texture
 		m_particleTexture.loadFromFile("src/res/textures/particle.png");
+		m_textureButton.setTexture(m_particleTexture);
 		m_particleSystem.setTexture(m_particleTexture);
 		m_particleSystem.addEmitter(thor::refEmitter(m_emitter));
 	}
@@ -54,7 +57,7 @@ namespace px
 		m_emitter.setParticleLifetime(sf::seconds(m_particle.lifetime));
 		m_emitter.setParticleScale(m_particle.scale);
 		m_emitter.setParticleRotation(m_particle.rotation);
-		m_emitter.setParticlePosition(thor::Distributions::circle(sf::Vector2f(300.f, 200.f), 50.f)); // Emit as circle
+		m_emitter.setParticlePosition(thor::Distributions::circle(m_particle.position, 50.f)); // Emit as circle
 		m_particleSystem.update(dt);
 	}
 
@@ -62,20 +65,65 @@ namespace px
 	{
 		static int floatPrecision = 3;
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
-		ImGui::Begin("Particle Editor", NULL, ImVec2(0, 0), 1.0f, flags);
+		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);
 		
+		ImGui::Spacing();
+		ImGui::InputFloat("Particles", &m_particle.nrOfParticles, 1.f);
+		ImGui::Spacing();
+		ImGui::InputFloat2("Position", &m_particle.position.x, floatPrecision);
+		ImGui::Spacing();
+		ImGui::InputFloat2("Scale", &m_particle.scale.x, floatPrecision);
+		ImGui::Spacing();
+		ImGui::InputFloat("Rotation", &m_particle.rotation, 1.f, 0.f, floatPrecision);
+		ImGui::Spacing();
+		ImGui::InputFloat("Lifetime", &m_particle.lifetime, 0.1f, 0.f, floatPrecision);
+		ImGui::Spacing();
+
 		ImGui::SetNextTreeNodeOpen(true, 2);
-		if (ImGui::CollapsingHeader("Properties"))
+		if (ImGui::CollapsingHeader("Emission"))
+		{
+		}
+		ImGui::Spacing();
+
+		ImGui::SetNextTreeNodeOpen(true, 2);
+		if (ImGui::CollapsingHeader("Shape"))
+		{
+		}
+		ImGui::Spacing();
+
+		ImGui::SetNextTreeNodeOpen(true, 2);
+		if (ImGui::CollapsingHeader("Renderer"))
 		{
 			ImGui::Spacing();
-			ImGui::InputFloat("Particles", &m_particle.nrOfParticles, 1.f);
-			ImGui::InputFloat2("Position", &m_particle.position.x, floatPrecision);
+			static int m_blendItem = 0;
+			const char* itemList[] = { "None", "BlendAdd", "BlendAlpha", "BlendMultiply" };
+			ImGui::Combo("Blend mode", &m_blendItem, itemList, IM_ARRAYSIZE(itemList));
+
+			switch (m_blendItem)
+			{
+			case 0:
+				m_blendMode = sf::BlendNone;
+				break;
+			case 1:
+				m_blendMode = sf::BlendAdd;
+				break;
+			case 2:
+				m_blendMode = sf::BlendAlpha;
+				break;
+			case 3:
+				m_blendMode = sf::BlendMultiply;
+				break;
+			default:
+				break;
+			}
+
 			ImGui::Spacing();
-			ImGui::InputFloat2("Scale", &m_particle.scale.x, floatPrecision);
+			ImGui::Separator();
 			ImGui::Spacing();
-			ImGui::InputFloat("Rotation", &m_particle.rotation, 1.f, 0.f, floatPrecision);
+			ImGui::ImageButton(m_textureButton, sf::Vector2f(100.f, 100.f));
+			ImGui::Text("src/res/textures/particle.png"); // TODO: fix real path with windows file browser?
 			ImGui::Spacing();
-			ImGui::InputFloat("Lifetime", &m_particle.lifetime, 0.1f, 0.f, floatPrecision);
+			ImGui::Separator();
 		}
 		ImGui::Spacing();
 
@@ -85,7 +133,7 @@ namespace px
 	void Application::render()
 	{
 		m_window.clear();
-		m_window.draw(m_particleSystem);
+		m_blendMode == sf::BlendNone ? m_window.draw(m_particleSystem) : m_window.draw(m_particleSystem, m_blendMode);
 		ImGui::SFML::Render(m_window);
 		m_window.display();
 	}
