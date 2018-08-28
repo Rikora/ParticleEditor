@@ -7,6 +7,9 @@
     <Filter Include="Source\ImGUI">
       <UniqueIdentifier>{f275e221-897c-4307-ae43-7dc44047ec33}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{96800faa-6bc3-47c3-b061-2415b11383a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -21,5 +24,13 @@
     <ClCompile Include="src\imgui\imgui-SFML.cpp">
       <Filter>Source\ImGUI</Filter>
     </ClCompile>
+    <ClCompile Include="src\editor\Application.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\editor\Application.hpp">
+      <Filter>Editor</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

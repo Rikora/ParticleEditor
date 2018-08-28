@@ -19,10 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\editor\Application.cpp" />
     <ClCompile Include="src\imgui\imgui-SFML.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\editor\Application.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -76,19 +80,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
