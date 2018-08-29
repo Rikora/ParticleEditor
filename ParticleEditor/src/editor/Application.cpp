@@ -56,6 +56,7 @@ namespace px
 		m_emitter.setParticleLifetime(sf::seconds(m_particle.lifetime));
 		m_emitter.setParticleScale(m_particle.scale);
 		m_emitter.setParticleRotation(m_particle.rotation);
+		m_emitter.setParticleColor(m_particle.color);
 
 		if (m_shape == "Circle")
 			m_emitter.setParticlePosition(thor::Distributions::circle(m_particle.position, m_particle.radius));
@@ -83,11 +84,13 @@ namespace px
 				value.y = 0.f;
 		};
 
+		// General properties
 		static int floatPrecision = 3;
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);	
 		ImGui::Spacing();
 
+		// Note: The emitter/affector can be added for a duration of time also!
 		if (ImGui::Checkbox("Looping", &m_particle.looping))
 			if(!m_emitterConnection.isConnected())
 				m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter));
@@ -106,12 +109,23 @@ namespace px
 		ImGui::InputFloat("Lifetime", &m_particle.lifetime, 0.1f, 0.f, floatPrecision);
 		ImGui::Spacing();
 
+		static float color[3] = { 0.f, 0.f, 0.f };
+		if (ImGui::ColorEdit3("Color", color))
+		{
+			m_particle.color.r = static_cast<sf::Uint8>(color[0] * 255.f);
+			m_particle.color.g = static_cast<sf::Uint8>(color[1] * 255.f);
+			m_particle.color.b = static_cast<sf::Uint8>(color[2] * 255.f);
+		}
+		ImGui::Spacing();
+
+		// Emission
 		ImGui::SetNextTreeNodeOpen(true, 2);
 		if (ImGui::CollapsingHeader("Emission"))
 		{
 		}
 		ImGui::Spacing();
 
+		// Shape
 		ImGui::SetNextTreeNodeOpen(true, 2);
 		if (ImGui::CollapsingHeader("Shape"))
 		{
@@ -139,6 +153,7 @@ namespace px
 		}
 		ImGui::Spacing();
 
+		// Renderer
 		ImGui::SetNextTreeNodeOpen(true, 2);
 		if (ImGui::CollapsingHeader("Renderer"))
 		{
@@ -168,7 +183,7 @@ namespace px
 			ImGui::Spacing();
 			ImGui::Separator();
 			ImGui::Spacing();
-			if (ImGui::ImageButton(m_textureButton, sf::Vector2f(100.f, 100.f))) // Note: Image doesn't always look good at 100.f dimensions depending on res of images
+			if (ImGui::ImageButton(m_textureButton, sf::Vector2f(100.f, 100.f), -1, sf::Color::Black, m_particle.color))
 			{
 				openFile(m_fullParticlePath, m_particlePath);
 				m_particleTexture.loadFromFile(m_fullParticlePath);

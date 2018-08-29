@@ -35,7 +35,8 @@ namespace px
 			float radius = 1.f;
 			sf::Vector2f halfSize = sf::Vector2f(1.f, 1.f);
 			sf::Vector2f position = sf::Vector2f(400.f, 400.f);
-			sf::Vector2f scale = sf::Vector2f(1.f, 1.f);
+			sf::Vector2f scale = sf::Vector2f(0.05f, 0.05f);
+			sf::Color color = sf::Color::White;
 		};
 
 	private:
