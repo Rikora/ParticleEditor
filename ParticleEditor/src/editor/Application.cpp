@@ -53,9 +53,11 @@ namespace px
 	{
 		// Update emitter
 		m_emitter.setEmissionRate(m_particle.nrOfParticles);
-		m_emitter.setParticleLifetime(sf::seconds(m_particle.lifetime));
-		m_emitter.setParticleScale(m_particle.scale);
-		m_emitter.setParticleRotation(m_particle.rotation);
+		m_emitter.setParticleLifetime(thor::Distributions::uniform(sf::seconds(m_particle.lifetime.x), sf::seconds(m_particle.lifetime.y)));
+		m_emitter.setParticleScale(m_particle.scale); //
+		m_emitter.setParticleRotation(thor::Distributions::uniform(m_particle.rotation.x, m_particle.rotation.y));
+		m_emitter.setParticleVelocity(m_particle.velocity); //
+		m_emitter.setParticleRotationSpeed(thor::Distributions::uniform(m_particle.rotationSpeed.x, m_particle.rotationSpeed.y));
 		m_emitter.setParticleColor(m_particle.color);
 
 		if (m_shape == "Circle")
@@ -84,6 +86,14 @@ namespace px
 				value.y = 0.f;
 		};
 
+		auto constrainDistrVec = [](sf::Vector2f & value)
+		{
+			if (value.x > value.y)
+				value.x = 0.f;
+			if (value.y < value.x)
+				value.y = 0.f;
+		};
+
 		// General properties
 		static int floatPrecision = 3;
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
@@ -104,9 +114,13 @@ namespace px
 		ImGui::Spacing();
 		ImGui::InputFloat2("Scale", &m_particle.scale.x, floatPrecision);
 		ImGui::Spacing();
-		ImGui::InputFloat("Rotation", &m_particle.rotation, 1.f, 0.f, floatPrecision);
+		ImGui::InputFloat2("Rotation", &m_particle.rotation.x, floatPrecision);
 		ImGui::Spacing();
-		ImGui::InputFloat("Lifetime", &m_particle.lifetime, 0.1f, 0.f, floatPrecision);
+		ImGui::InputFloat2("Rotation Speed", &m_particle.rotationSpeed.x, floatPrecision);
+		ImGui::Spacing();
+		ImGui::InputFloat2("Velocity", &m_particle.velocity.x, floatPrecision);
+		ImGui::Spacing();
+		ImGui::InputFloat2("Lifetime", &m_particle.lifetime.x, floatPrecision);
 		ImGui::Spacing();
 
 		static float color[3] = { 0.f, 0.f, 0.f };
@@ -115,13 +129,6 @@ namespace px
 			m_particle.color.r = static_cast<sf::Uint8>(color[0] * 255.f);
 			m_particle.color.g = static_cast<sf::Uint8>(color[1] * 255.f);
 			m_particle.color.b = static_cast<sf::Uint8>(color[2] * 255.f);
-		}
-		ImGui::Spacing();
-
-		// Emission
-		ImGui::SetNextTreeNodeOpen(true, 2);
-		if (ImGui::CollapsingHeader("Emission"))
-		{
 		}
 		ImGui::Spacing();
 
@@ -197,11 +204,15 @@ namespace px
 		ImGui::Spacing();
 		ImGui::End();
 
-		// Prevent the editor from crashing on negative values
+		// Prevent the editor from crashing on undefined behavior
 		constrainNegatives(m_particle.nrOfParticles);
-		constrainNegatives(m_particle.lifetime);
 		constrainNegatives(m_particle.radius);
+		constrainNegativesVec(m_particle.lifetime);
 		constrainNegativesVec(m_particle.halfSize);
+		constrainNegativesVec(m_particle.rotationSpeed);
+		constrainDistrVec(m_particle.rotation);
+		constrainDistrVec(m_particle.lifetime);
+		constrainDistrVec(m_particle.rotationSpeed);
 	}
 
 	void Application::render()

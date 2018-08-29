@@ -29,13 +29,15 @@ namespace px
 		struct Properties
 		{
 			bool looping = true;
-			float nrOfParticles = 1.f;
-			float rotation = 0.f;
-			float lifetime = 1.f;
 			float radius = 1.f;
+			float nrOfParticles = 1.f;
+			sf::Vector2f rotationSpeed = sf::Vector2f(0.f, 0.f);
+			sf::Vector2f rotation = sf::Vector2f(0.f, 0.f);
+			sf::Vector2f lifetime = sf::Vector2f(1.f, 1.f);
 			sf::Vector2f halfSize = sf::Vector2f(1.f, 1.f);
 			sf::Vector2f position = sf::Vector2f(400.f, 400.f);
 			sf::Vector2f scale = sf::Vector2f(0.05f, 0.05f);
+			sf::Vector2f velocity = sf::Vector2f(0.f, 0.f);
 			sf::Color color = sf::Color::White;
 		};
 
