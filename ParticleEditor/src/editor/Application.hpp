@@ -23,6 +23,7 @@ namespace px
 		void updateParticles(sf::Time dt);
 		void updateGUI();
 		void render();
+		void openFile(std::string & filePath, std::string & file);
 
 	private:
 		struct Properties
@@ -38,6 +39,8 @@ namespace px
 
 	private:
 		sf::RenderWindow m_window;
+		std::string m_fullParticlePath;
+		std::string m_particlePath;
 		sf::Texture m_particleTexture;
 		sf::Sprite m_textureButton;
 		sf::BlendMode m_blendMode;

@@ -2,6 +2,8 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <editor/Application.hpp>
+#include <iostream>
+#include <Windows.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <SFML/Window/Event.hpp>
@@ -12,7 +14,7 @@
 namespace px
 {
 	Application::Application() : m_window(sf::VideoMode(1200U, 800U), "Particle Editor", sf::Style::Close,
-										  sf::ContextSettings(0U, 0U, 8U))
+										  sf::ContextSettings(0U, 0U, 8U)), m_particlePath("particle.png")
 	{
 		m_window.setVerticalSyncEnabled(true);
 		ImGui::SFML::Init(m_window);
@@ -63,6 +65,12 @@ namespace px
 
 	void Application::updateGUI()
 	{
+		auto constrainNegatives = [](float & value)
+		{
+			if (value < 0)
+				value = 0.f;
+		};
+
 		static int floatPrecision = 3;
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);
@@ -78,6 +86,10 @@ namespace px
 		ImGui::Spacing();
 		ImGui::InputFloat("Lifetime", &m_particle.lifetime, 0.1f, 0.f, floatPrecision);
 		ImGui::Spacing();
+
+		// Prevent the editor from crashing on negative values
+		constrainNegatives(m_particle.nrOfParticles);
+		constrainNegatives(m_particle.lifetime);
 
 		ImGui::SetNextTreeNodeOpen(true, 2);
 		if (ImGui::CollapsingHeader("Emission"))
@@ -120,8 +132,14 @@ namespace px
 			ImGui::Spacing();
 			ImGui::Separator();
 			ImGui::Spacing();
-			ImGui::ImageButton(m_textureButton, sf::Vector2f(100.f, 100.f));
-			ImGui::Text("src/res/textures/particle.png"); // TODO: fix real path with windows file browser?
+			if (ImGui::ImageButton(m_textureButton, sf::Vector2f(100.f, 100.f))) // Note: Image doesn't always look good at 100.f dimensions depending on res of images
+			{
+				openFile(m_fullParticlePath, m_particlePath);
+				m_particleTexture.loadFromFile(m_fullParticlePath);
+				m_particleSystem.setTexture(m_particleTexture);
+				m_textureButton.setTexture(m_particleTexture);
+			}
+			ImGui::Text(m_particlePath.c_str());
 			ImGui::Spacing();
 			ImGui::Separator();
 		}
@@ -148,6 +166,32 @@ namespace px
 			update(clock.restart());
 			updateGUI();
 			render();
+		}
+	}
+
+	// File browser with the Windows API
+	void Application::openFile(std::string & filePath, std::string & file)
+	{
+		char filename[MAX_PATH] = "\0";
+		OPENFILENAME ofn;
+		ZeroMemory(&filename, sizeof(filename));
+		ZeroMemory(&ofn, sizeof(ofn));
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = m_window.getSystemHandle();
+		const char *filter =
+			"Images (.jpg;.png)\0*.jpg;*.png\0"
+			"All Files (*.*)\0*.*\0\0";
+		ofn.lpstrFilter = filter;
+		ofn.lpstrFile = filename;
+		ofn.nMaxFile = MAX_PATH;
+		ofn.Flags = OFN_HIDEREADONLY;
+
+		if (GetOpenFileNameA(&ofn))
+		{
+			filePath = filename;
+			std::replace(filePath.begin(), filePath.end(), '\\', '/');
+			auto found = filePath.find_last_of("/");
+			file = filePath.substr(found + 1);
 		}
 	}
 }
