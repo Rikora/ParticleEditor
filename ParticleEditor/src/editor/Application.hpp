@@ -28,6 +28,7 @@ namespace px
 	private:
 		struct Properties
 		{
+			bool looping = true;
 			float nrOfParticles = 1.f;
 			float rotation = 0.f;
 			float lifetime = 1.f;
@@ -39,13 +40,13 @@ namespace px
 
 	private:
 		sf::RenderWindow m_window;
-		std::string m_fullParticlePath;
-		std::string m_particlePath;
+		std::string m_shape, m_fullParticlePath, m_particlePath;
 		sf::Texture m_particleTexture;
 		sf::Sprite m_textureButton;
 		sf::BlendMode m_blendMode;
 		thor::ParticleSystem m_particleSystem;
 		thor::UniversalEmitter m_emitter;
+		thor::Connection m_emitterConnection;
 		Properties m_particle;
 	};
 }

@@ -23,7 +23,7 @@ namespace px
 		m_particleTexture.loadFromFile("src/res/textures/particle.png");
 		m_textureButton.setTexture(m_particleTexture);
 		m_particleSystem.setTexture(m_particleTexture);
-		m_particleSystem.addEmitter(thor::refEmitter(m_emitter));
+		m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter));
 	}
 
 	Application::~Application()
@@ -51,15 +51,19 @@ namespace px
 
 	void Application::updateParticles(sf::Time dt)
 	{
-		// TODO: Set texture on choice here?
-
 		// Update emitter
-		// TODO: Add conditional expressions when circular position is marked for instance
 		m_emitter.setEmissionRate(m_particle.nrOfParticles);
 		m_emitter.setParticleLifetime(sf::seconds(m_particle.lifetime));
 		m_emitter.setParticleScale(m_particle.scale);
 		m_emitter.setParticleRotation(m_particle.rotation);
-		m_emitter.setParticlePosition(thor::Distributions::circle(m_particle.position, 50.f)); // Emit as circle
+
+		if (m_shape == "Circle")
+			m_emitter.setParticlePosition(thor::Distributions::circle(m_particle.position, m_particle.radius));
+		else if (m_shape == "Rectangle")
+			m_emitter.setParticlePosition(thor::Distributions::rect(m_particle.position, m_particle.halfSize));
+		else
+			m_emitter.setParticlePosition(m_particle.position);
+
 		m_particleSystem.update(dt);
 	}
 
@@ -67,14 +71,29 @@ namespace px
 	{
 		auto constrainNegatives = [](float & value)
 		{
-			if (value < 0)
+			if (value < 0.f)
 				value = 0.f;
+		};
+
+		auto constrainNegativesVec = [](sf::Vector2f & value)
+		{
+			if (value.x < 0.f)
+				value.x = 0.f;
+			if (value.y < 0.f)
+				value.y = 0.f;
 		};
 
 		static int floatPrecision = 3;
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
-		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);
-		
+		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);	
+		ImGui::Spacing();
+
+		if (ImGui::Checkbox("Looping", &m_particle.looping))
+			if(!m_emitterConnection.isConnected())
+				m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter));
+		else
+			m_emitterConnection.disconnect();
+
 		ImGui::Spacing();
 		ImGui::InputFloat("Particles", &m_particle.nrOfParticles, 1.f);
 		ImGui::Spacing();
@@ -87,10 +106,6 @@ namespace px
 		ImGui::InputFloat("Lifetime", &m_particle.lifetime, 0.1f, 0.f, floatPrecision);
 		ImGui::Spacing();
 
-		// Prevent the editor from crashing on negative values
-		constrainNegatives(m_particle.nrOfParticles);
-		constrainNegatives(m_particle.lifetime);
-
 		ImGui::SetNextTreeNodeOpen(true, 2);
 		if (ImGui::CollapsingHeader("Emission"))
 		{
@@ -100,6 +115,27 @@ namespace px
 		ImGui::SetNextTreeNodeOpen(true, 2);
 		if (ImGui::CollapsingHeader("Shape"))
 		{
+			ImGui::Spacing();
+			static int m_shapeItem = 0;
+			const char* itemList[] = { "None", "Circle", "Rectangle" };
+			ImGui::Combo("Shape##1", &m_shapeItem, itemList, IM_ARRAYSIZE(itemList));
+
+			if (m_shapeItem == 1)
+			{
+				m_shape = "Circle";
+				ImGui::Spacing();
+				ImGui::InputFloat("Radius", &m_particle.radius, 1.f);
+				ImGui::Spacing();
+			}
+			else if (m_shapeItem == 2)
+			{
+				m_shape = "Rectangle";
+				ImGui::Spacing();
+				ImGui::InputFloat2("Half size", &m_particle.halfSize.x, floatPrecision);
+				ImGui::Spacing();
+			}
+			else
+				m_shape = "None";
 		}
 		ImGui::Spacing();
 
@@ -144,8 +180,13 @@ namespace px
 			ImGui::Separator();
 		}
 		ImGui::Spacing();
-
 		ImGui::End();
+
+		// Prevent the editor from crashing on negative values
+		constrainNegatives(m_particle.nrOfParticles);
+		constrainNegatives(m_particle.lifetime);
+		constrainNegatives(m_particle.radius);
+		constrainNegativesVec(m_particle.halfSize);
 	}
 
 	void Application::render()
