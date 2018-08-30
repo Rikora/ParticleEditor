@@ -15,15 +15,12 @@
 
 namespace px
 {
-	inline thor::Distribution<sf::Vector2f> scaleDistribution(sf::Vector2f startSize, sf::Vector2f endSize)
+	inline thor::Distribution<sf::Vector2f> scaleDistribution(sf::Vector2f size)
 	{	
 		return [=]() -> sf::Vector2f
 		{
-			// Random between 0 and 1, and return either startsize or endsize
-			// Not the actual behavior we want!
-			return sf::Vector2f(
-				   thor::random(startSize.x, endSize.x),
-				   thor::random(startSize.y, endSize.y));
+			auto res = thor::random(size.x, size.y);
+			return sf::Vector2f(res, res);
 		};
 	}
 
@@ -69,9 +66,9 @@ namespace px
 		// Update emitter
 		m_emitter.setEmissionRate(m_particle.nrOfParticles);
 		m_emitter.setParticleLifetime(thor::Distributions::uniform(sf::seconds(m_particle.lifetime.x), sf::seconds(m_particle.lifetime.y)));
-		m_emitter.setParticleScale(scaleDistribution(m_particle.startScale, m_particle.endScale));
+		m_emitter.setParticleScale(scaleDistribution(m_particle.size));
 		m_emitter.setParticleRotation(thor::Distributions::uniform(m_particle.rotation.x, m_particle.rotation.y));
-		m_emitter.setParticleVelocity(m_particle.velocity); //
+		m_emitter.setParticleVelocity(m_particle.velocity);
 		m_emitter.setParticleRotationSpeed(thor::Distributions::uniform(m_particle.rotationSpeed.x, m_particle.rotationSpeed.y));
 		m_emitter.setParticleColor(m_particle.color);
 
@@ -92,6 +89,7 @@ namespace px
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);	
 		ImGui::Spacing();
+
 		// Unity seems to have some sort of delay before restarting the looping so can't simulate the behavior really
 		// Could need a play once button or something
 		ImGui::Checkbox("Looping", &m_particle.looping);
@@ -102,6 +100,8 @@ namespace px
 		ImGui::Spacing();
 		ImGui::InputFloat2("Position", &m_particle.position.x, floatPrecision);
 		ImGui::Spacing();
+		ImGui::InputFloat2("Size", &m_particle.size.x, floatPrecision);
+		ImGui::Spacing();
 		ImGui::InputFloat2("Rotation", &m_particle.rotation.x, floatPrecision);
 		ImGui::Spacing();
 		ImGui::InputFloat2("Rotation Speed", &m_particle.rotationSpeed.x, floatPrecision);
@@ -111,23 +111,12 @@ namespace px
 		ImGui::InputFloat2("Lifetime", &m_particle.lifetime.x, floatPrecision);
 		ImGui::Spacing();
 	
-		static float color[3] = { 0.f, 0.f, 0.f };
+		static float color[3] = { 1.f, 1.f, 1.f };
 		if (ImGui::ColorEdit3("Color", color))
 		{
 			m_particle.color.r = static_cast<sf::Uint8>(color[0] * 255.f);
 			m_particle.color.g = static_cast<sf::Uint8>(color[1] * 255.f);
 			m_particle.color.b = static_cast<sf::Uint8>(color[2] * 255.f);
-		}
-		ImGui::Spacing();
-
-		ImGui::SetNextTreeNodeOpen(true, 2);
-		if (ImGui::CollapsingHeader("Size over Lifetime"))
-		{
-			ImGui::Spacing();
-			ImGui::InputFloat2("Start size", &m_particle.startScale.x, floatPrecision);
-			ImGui::Spacing();
-			ImGui::InputFloat2("End size", &m_particle.endScale.x, floatPrecision);
-			ImGui::Spacing();
 		}
 		ImGui::Spacing();
 
@@ -143,8 +132,12 @@ namespace px
 				if (m_particle.fader.x + m_particle.fader.y > 1.f)
 					m_particle.fader = sf::Vector2f(0.f, 0.f);
 
+				// Make sure we don't add more than one animation affector
+				if (m_fadeConnection.isConnected())
+					m_fadeConnection.disconnect();
+
 				thor::FadeAnimation fader(m_particle.fader.x, m_particle.fader.y);
-				m_particleSystem.addAffector(thor::AnimationAffector(fader));
+				m_fadeConnection = m_particleSystem.addAffector(thor::AnimationAffector(fader));
 			}
 			ImGui::Spacing();
 		}
@@ -226,14 +219,14 @@ namespace px
 		utils::constrainNegatives(m_particle.duration);
 		utils::constrainNegatives(m_particle.nrOfParticles);
 		utils::constrainNegatives(m_particle.radius);
+		utils::constrainNegativesVec(m_particle.size);
 		utils::constrainNegativesVec(m_particle.lifetime);
 		utils::constrainNegativesVec(m_particle.halfSize);
 		utils::constrainNegativesVec(m_particle.rotationSpeed);
 		utils::constrainDistrVec(m_particle.rotation);
 		utils::constrainDistrVec(m_particle.lifetime);
 		utils::constrainDistrVec(m_particle.rotationSpeed);
-		utils::constrainDistrVec(m_particle.startScale.x, m_particle.endScale.x);
-		utils::constrainDistrVec(m_particle.startScale.y, m_particle.endScale.y);
+		utils::constrainDistrVec(m_particle.size);
 
 		if (!m_emitterConnection.isConnected() && m_particle.looping)
 			m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration));
