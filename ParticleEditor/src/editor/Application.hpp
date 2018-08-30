@@ -29,6 +29,7 @@ namespace px
 		struct Properties
 		{
 			bool looping = true;
+			float duration = 1.f;
 			float radius = 1.f;
 			float nrOfParticles = 1.f;
 			sf::Vector2f rotationSpeed = sf::Vector2f(0.f, 0.f);

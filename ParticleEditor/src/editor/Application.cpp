@@ -24,7 +24,7 @@ namespace px
 		m_particleTexture.loadFromFile("src/res/textures/particle.png");
 		m_textureButton.setTexture(m_particleTexture);
 		m_particleSystem.setTexture(m_particleTexture);
-		m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter));
+		m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration)); 
 	}
 
 	Application::~Application()
@@ -81,24 +81,19 @@ namespace px
 
 		auto constrainNegatives = [](float & value)
 		{
-			if (value < 0.f)
-				value = 0.f;
+			value = std::clamp(value, 0.f, std::numeric_limits<float>::max());
 		};
 
 		auto constrainNegativesVec = [](sf::Vector2f & value)
 		{
-			if (value.x < 0.f)
-				value.x = 0.f;
-			if (value.y < 0.f)
-				value.y = 0.f;
+			value.x = std::clamp(value.x, 0.f, std::numeric_limits<float>::max());
+			value.y = std::clamp(value.y, 0.f, std::numeric_limits<float>::max());
 		};
 
 		auto constrainDistrVec = [](sf::Vector2f & value)
 		{
-			if (value.x > value.y)
-				value.x = 0.f;
-			if (value.y < value.x)
-				value.y = 0.f;	
+			value.x = std::clamp(value.x, 0.f, value.y);
+			value.y = std::clamp(value.y, value.x, std::numeric_limits<float>::max());
 		};
 
 		// General properties
@@ -106,14 +101,11 @@ namespace px
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);	
 		ImGui::Spacing();
-
-		// Note: The emitter/affector can be added for a duration of time also!
-		if (ImGui::Checkbox("Looping", &m_particle.looping))
-			if(!m_emitterConnection.isConnected())
-				m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter));
-		else
-			m_emitterConnection.disconnect();
-
+		// Unity seems to have some sort of delay before restarting the looping so can't simulate the behavior really
+		// Could need a play once button or something
+		ImGui::Checkbox("Looping", &m_particle.looping);
+		ImGui::Spacing();
+		ImGui::InputFloat("Duration", &m_particle.duration, 0.1f);
 		ImGui::Spacing();
 		ImGui::InputFloat("Particles", &m_particle.nrOfParticles, 1.f);
 		ImGui::Spacing();
@@ -231,6 +223,7 @@ namespace px
 		ImGui::End();
 
 		// Prevent the editor from crashing on undefined behavior
+		constrainNegatives(m_particle.duration);
 		constrainNegatives(m_particle.nrOfParticles);
 		constrainNegatives(m_particle.radius);
 		constrainNegativesVec(m_particle.lifetime);
@@ -239,6 +232,11 @@ namespace px
 		constrainDistrVec(m_particle.rotation);
 		constrainDistrVec(m_particle.lifetime);
 		constrainDistrVec(m_particle.rotationSpeed);
+
+		if (!m_emitterConnection.isConnected() && m_particle.looping)
+			m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration));
+		else if (!m_particle.looping)
+			m_emitterConnection.disconnect();
 	}
 
 	void Application::render()
