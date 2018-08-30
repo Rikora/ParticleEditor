@@ -10,6 +10,9 @@
     <Filter Include="Editor">
       <UniqueIdentifier>{96800faa-6bc3-47c3-b061-2415b11383a6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{1ae28072-9add-4004-a43b-abbdad10cbde}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -31,6 +34,9 @@
   <ItemGroup>
     <ClInclude Include="src\editor\Application.hpp">
       <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\Utility.hpp">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
