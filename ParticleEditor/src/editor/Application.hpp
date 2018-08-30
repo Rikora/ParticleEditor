@@ -38,6 +38,7 @@ namespace px
 			sf::Vector2f position = sf::Vector2f(400.f, 400.f);
 			sf::Vector2f scale = sf::Vector2f(0.05f, 0.05f);
 			sf::Vector2f velocity = sf::Vector2f(0.f, 0.f);
+			sf::Vector2f fader = sf::Vector2f(0.f, 0.f);
 			sf::Color color = sf::Color::White;
 		};
 

@@ -8,6 +8,7 @@
 #include <imgui-SFML.h>
 #include <SFML/Window/Event.hpp>
 #include <Thor/Math.hpp>
+#include <Thor/Animations/FadeAnimation.hpp>
 
 #define IM_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
@@ -72,6 +73,12 @@ namespace px
 
 	void Application::updateGUI()
 	{
+		auto clampVec = [](sf::Vector2f & value, const float & min, const float & max)
+		{
+			value.x = std::clamp(value.x, min, max);
+			value.y = std::clamp(value.y, min, max);
+		};
+
 		auto constrainNegatives = [](float & value)
 		{
 			if (value < 0.f)
@@ -91,7 +98,7 @@ namespace px
 			if (value.x > value.y)
 				value.x = 0.f;
 			if (value.y < value.x)
-				value.y = 0.f;
+				value.y = 0.f;	
 		};
 
 		// General properties
@@ -122,13 +129,32 @@ namespace px
 		ImGui::Spacing();
 		ImGui::InputFloat2("Lifetime", &m_particle.lifetime.x, floatPrecision);
 		ImGui::Spacing();
-
+	
 		static float color[3] = { 0.f, 0.f, 0.f };
 		if (ImGui::ColorEdit3("Color", color))
 		{
 			m_particle.color.r = static_cast<sf::Uint8>(color[0] * 255.f);
 			m_particle.color.g = static_cast<sf::Uint8>(color[1] * 255.f);
 			m_particle.color.b = static_cast<sf::Uint8>(color[2] * 255.f);
+		}
+		ImGui::Spacing();
+
+		ImGui::SetNextTreeNodeOpen(true, 2);
+		if (ImGui::CollapsingHeader("Alpha over Lifetime"))
+		{
+			ImGui::Spacing();
+			if (ImGui::InputFloat2("Alpha", &m_particle.fader.x, floatPrecision))
+			{
+				clampVec(m_particle.fader, 0.f, 1.f);
+
+				// Time interval between [0, 1]
+				if (m_particle.fader.x + m_particle.fader.y > 1.f)
+					m_particle.fader = sf::Vector2f(0.f, 0.f);
+
+				thor::FadeAnimation fader(m_particle.fader.x, m_particle.fader.y);
+				m_particleSystem.addAffector(thor::AnimationAffector(fader));
+			}
+			ImGui::Spacing();
 		}
 		ImGui::Spacing();
 
