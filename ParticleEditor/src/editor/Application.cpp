@@ -9,6 +9,7 @@
 #include <imgui-SFML.h>
 #include <SFML/Window/Event.hpp>
 #include <Thor/Math.hpp>
+#include <Thor/Vectors/PolarVector2.hpp>
 #include <Thor/Animations/FadeAnimation.hpp>
 
 #define IM_ARRAYSIZE(_ARR) ((int)(sizeof(_ARR)/sizeof(*_ARR)))
@@ -68,9 +69,24 @@ namespace px
 		m_emitter.setParticleLifetime(thor::Distributions::uniform(sf::seconds(m_particle.lifetime.x), sf::seconds(m_particle.lifetime.y)));
 		m_emitter.setParticleScale(scaleDistribution(m_particle.size));
 		m_emitter.setParticleRotation(thor::Distributions::uniform(m_particle.rotation.x, m_particle.rotation.y));
-		m_emitter.setParticleVelocity(m_particle.velocity);
 		m_emitter.setParticleRotationSpeed(thor::Distributions::uniform(m_particle.rotationSpeed.x, m_particle.rotationSpeed.y));
 		m_emitter.setParticleColor(m_particle.color);
+
+		if (m_particle.velocityPolarCoordinates)
+		{
+			if (m_particle.deflect)
+				m_emitter.setParticleVelocity(thor::Distributions::deflect(
+											  thor::PolarVector2f(m_particle.velocity.x, m_particle.velocity.y), m_particle.maxRotation));
+			else
+				m_emitter.setParticleVelocity(thor::PolarVector2f(m_particle.velocity.x, m_particle.velocity.y));
+		}
+		else
+		{
+			if(m_particle.deflect)
+				m_emitter.setParticleVelocity(thor::Distributions::deflect(m_particle.velocity, m_particle.maxRotation));
+			else
+				m_emitter.setParticleVelocity(m_particle.velocity);
+		}
 
 		if (m_particle.shape == "Circle")
 			m_emitter.setParticlePosition(thor::Distributions::circle(m_particle.position, m_particle.radius));
@@ -89,9 +105,6 @@ namespace px
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);	
 		ImGui::Spacing();
-
-		// Unity seems to have some sort of delay before restarting the looping so can't simulate the behavior really
-		// Could need a play once button or something
 		ImGui::Checkbox("Looping", &m_particle.looping);
 		ImGui::Spacing();
 		ImGui::InputFloat("Duration", &m_particle.duration, 0.1f);
@@ -106,8 +119,6 @@ namespace px
 		ImGui::Spacing();
 		ImGui::InputFloat2("Rotation Speed", &m_particle.rotationSpeed.x, floatPrecision);
 		ImGui::Spacing();
-		ImGui::InputFloat2("Velocity", &m_particle.velocity.x, floatPrecision);
-		ImGui::Spacing();
 		ImGui::InputFloat2("Lifetime", &m_particle.lifetime.x, floatPrecision);
 		ImGui::Spacing();
 	
@@ -120,6 +131,7 @@ namespace px
 		}
 		ImGui::Spacing();
 
+		// Alpha over lifetime
 		ImGui::SetNextTreeNodeOpen(true, 2);
 		if (ImGui::CollapsingHeader("Alpha over Lifetime"))
 		{
@@ -138,6 +150,44 @@ namespace px
 
 				thor::FadeAnimation fader(m_particle.fader.x, m_particle.fader.y);
 				m_fadeConnection = m_particleSystem.addAffector(thor::AnimationAffector(fader));
+			}
+			ImGui::Spacing();
+		}
+		ImGui::Spacing();
+
+		// Velocity over lifetime
+		ImGui::SetNextTreeNodeOpen(true, 2);
+		if (ImGui::CollapsingHeader("Velocity over Lifetime"))
+		{
+			ImGui::Spacing();
+			ImGui::Checkbox("Deflect", &m_particle.deflect);
+			ImGui::Spacing();
+			if (ImGui::Checkbox("Use Polar Coordinates", &m_particle.velocityPolarCoordinates))
+				m_particle.velocity = sf::Vector2f(0.f, 0.f);
+			ImGui::Spacing();
+			ImGui::InputFloat2("Velocity", &m_particle.velocity.x, floatPrecision);	
+			ImGui::Spacing();
+
+			if (m_particle.deflect)
+			{
+				ImGui::InputFloat("Max rotation", &m_particle.maxRotation, 1.f);
+				ImGui::Spacing();
+			}			
+		}
+		ImGui::Spacing();
+
+		// Torque over lifetime
+		ImGui::SetNextTreeNodeOpen(true, 2);
+		if (ImGui::CollapsingHeader("Torque over Lifetime"))
+		{
+			ImGui::Spacing();
+			if (ImGui::InputFloat("Torque", &m_particle.torque, 1.f))
+			{
+				// Make sure we don't add more than one torque affector
+				if (m_torqueConnection.isConnected())
+					m_torqueConnection.disconnect();
+
+				m_torqueConnection = m_particleSystem.addAffector(thor::TorqueAffector(m_particle.torque));		
 			}
 			ImGui::Spacing();
 		}
@@ -216,6 +266,7 @@ namespace px
 		ImGui::End();
 
 		// Prevent the editor from crashing on undefined behavior
+		utils::constrainNegatives(m_particle.maxRotation);
 		utils::constrainNegatives(m_particle.duration);
 		utils::constrainNegatives(m_particle.nrOfParticles);
 		utils::constrainNegatives(m_particle.radius);
