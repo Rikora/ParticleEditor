@@ -30,7 +30,7 @@ namespace px
 		{
 			bool looping = true;
 			bool deflect = false;
-			bool velocityPolarCoordinates = false;
+			bool velocityPolarVector = false;
 			float duration = 1.f;
 			float radius = 1.f;
 			float nrOfParticles = 1.f;
@@ -44,6 +44,7 @@ namespace px
 			sf::Vector2f size = sf::Vector2f(0.05f, 0.05f);
 			sf::Vector2f velocity = sf::Vector2f(0.f, 0.f);
 			sf::Vector2f fader = sf::Vector2f(0.f, 0.f);
+			sf::Vector2f force = sf::Vector2f(0.f, 0.f);
 			sf::Color color = sf::Color::White;
 			std::string shape;
 		};
@@ -51,14 +52,15 @@ namespace px
 	private:
 		sf::RenderWindow m_window;
 		std::string m_fullParticlePath, m_particlePath;
-		sf::Texture m_particleTexture;
-		sf::Sprite m_textureButton;
+		sf::Texture m_particleTexture, m_playButtonTexture, m_pauseButtonTexture;
+		sf::Sprite m_textureButton, m_playButton, m_pauseButton;
 		sf::BlendMode m_blendMode;
 		thor::ParticleSystem m_particleSystem;
 		thor::UniversalEmitter m_emitter;
 		thor::Connection m_emitterConnection;
 		thor::Connection m_fadeConnection;
 		thor::Connection m_torqueConnection;
+		thor::Connection m_forceConnection;
 		Properties m_particle;
 	};
 }

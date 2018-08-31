@@ -32,7 +32,11 @@ namespace px
 		ImGui::SFML::Init(m_window);
 
 		// Load texture
+		m_playButtonTexture.loadFromFile("src/res/textures/icons/play_button.png");
+		m_pauseButtonTexture.loadFromFile("src/res/textures/icons/pause_button.png");
 		m_particleTexture.loadFromFile("src/res/textures/particle.png");
+		m_playButton.setTexture(m_playButtonTexture);
+		m_pauseButton.setTexture(m_pauseButtonTexture);
 		m_textureButton.setTexture(m_particleTexture);
 		m_particleSystem.setTexture(m_particleTexture);
 		m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration)); 
@@ -71,7 +75,7 @@ namespace px
 		m_emitter.setParticleRotationSpeed(thor::Distributions::uniform(m_particle.rotationSpeed.x, m_particle.rotationSpeed.y));
 		m_emitter.setParticleColor(m_particle.color);
 
-		if (m_particle.velocityPolarCoordinates)
+		if (m_particle.velocityPolarVector)
 		{
 			if (m_particle.deflect)
 				m_emitter.setParticleVelocity(thor::Distributions::deflect(
@@ -99,12 +103,22 @@ namespace px
 
 	void Application::updateGUI()
 	{
+		// Simulation overlay when looping is off
+		ImGui::SetNextWindowPos(ImVec2(700, 20));
+		ImGui::Begin("Overlay", NULL, ImVec2(100, 0), 0.3f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+		ImGui::ImageButton(m_playButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black);
+		ImGui::SameLine();
+		ImGui::ImageButton(m_pauseButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black);
+		//ImGui::Text("\nTime: 00:00");
+		ImGui::End();
+
 		// General properties
 		static int floatPrecision = 3;
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);	
 		ImGui::Spacing();
-		ImGui::Checkbox("Looping", &m_particle.looping);
+		ImGui::Checkbox("Looping", &m_particle.looping); // Should be a play once button when this is disabled
 		ImGui::Spacing();
 		ImGui::InputFloat("Duration", &m_particle.duration, 0.1f);
 		ImGui::Spacing();
@@ -161,7 +175,7 @@ namespace px
 			ImGui::Spacing();
 			ImGui::Checkbox("Deflect", &m_particle.deflect);
 			ImGui::Spacing();
-			if (ImGui::Checkbox("Use Polar Coordinates", &m_particle.velocityPolarCoordinates))
+			if (ImGui::Checkbox("Use Polar Vector", &m_particle.velocityPolarVector))
 				m_particle.velocity = sf::Vector2f(0.f, 0.f);
 			ImGui::Spacing();
 			ImGui::InputFloat2("Velocity", &m_particle.velocity.x, floatPrecision);	
@@ -172,6 +186,23 @@ namespace px
 				ImGui::InputFloat("Max rotation", &m_particle.maxRotation, 1.f);
 				ImGui::Spacing();
 			}			
+		}
+		ImGui::Spacing();
+
+		// Force over lifetime
+		ImGui::SetNextTreeNodeOpen(true, 2);
+		if (ImGui::CollapsingHeader("Force over Lifetime"))
+		{
+			ImGui::Spacing();
+			if (ImGui::InputFloat2("Force", &m_particle.force.x, floatPrecision))
+			{
+				// Make sure we don't add more than one force affector
+				if (m_forceConnection.isConnected())
+					m_forceConnection.disconnect();
+
+				m_forceConnection = m_particleSystem.addAffector(thor::ForceAffector(m_particle.force));
+			}
+			ImGui::Spacing();
 		}
 		ImGui::Spacing();
 
@@ -305,10 +336,10 @@ namespace px
 		}
 	}
 
-	// File browser with the Windows API
+	// File browser
 	void Application::openFile(std::string & filePath, std::string & file)
 	{
-		nfdchar_t *outPath = NULL;
+		nfdchar_t* outPath = NULL;
 		nfdresult_t result = NFD_OpenDialog("png,jpg", NULL, &outPath);
 
 		if (result == NFD_OKAY)
@@ -320,7 +351,7 @@ namespace px
 			free(outPath);
 		}
 		else if (result == NFD_CANCEL)
-			puts("User pressed cancel.");
+			printf("User pressed cancel.\n");
 		else
 			printf("Error: %s\n", NFD_GetError());
 	}
