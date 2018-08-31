@@ -4,13 +4,13 @@
 #include <editor/Application.hpp>
 #include <utils/Utility.hpp>
 #include <iostream>
-#include <Windows.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <SFML/Window/Event.hpp>
 #include <Thor/Math.hpp>
 #include <Thor/Vectors/PolarVector2.hpp>
 #include <Thor/Animations/FadeAnimation.hpp>
+#include <nfd.h>
 
 #define IM_ARRAYSIZE(_ARR) ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
@@ -24,7 +24,6 @@ namespace px
 			return sf::Vector2f(res, res);
 		};
 	}
-
 
 	Application::Application() : m_window(sf::VideoMode(1200U, 800U), "Particle Editor", sf::Style::Close,
 										  sf::ContextSettings(0U, 0U, 8U)), m_particlePath("particle.png")
@@ -309,26 +308,20 @@ namespace px
 	// File browser with the Windows API
 	void Application::openFile(std::string & filePath, std::string & file)
 	{
-		char filename[MAX_PATH] = "\0";
-		OPENFILENAME ofn;
-		ZeroMemory(&filename, sizeof(filename));
-		ZeroMemory(&ofn, sizeof(ofn));
-		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = m_window.getSystemHandle();
-		const char *filter =
-			"Images (.jpg;.png)\0*.jpg;*.png\0"
-			"All Files (*.*)\0*.*\0\0";
-		ofn.lpstrFilter = filter;
-		ofn.lpstrFile = filename;
-		ofn.nMaxFile = MAX_PATH;
-		ofn.Flags = OFN_HIDEREADONLY;
+		nfdchar_t *outPath = NULL;
+		nfdresult_t result = NFD_OpenDialog("png,jpg", NULL, &outPath);
 
-		if (GetOpenFileNameA(&ofn))
+		if (result == NFD_OKAY)
 		{
-			filePath = filename;
+			filePath = outPath;
 			std::replace(filePath.begin(), filePath.end(), '\\', '/');
 			auto found = filePath.find_last_of("/");
 			file = filePath.substr(found + 1);
+			free(outPath);
 		}
+		else if (result == NFD_CANCEL)
+			puts("User pressed cancel.");
+		else
+			printf("Error: %s\n", NFD_GetError());
 	}
 }

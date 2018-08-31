@@ -81,20 +81,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(ProjectDir)/third-party/nfd/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(ProjectDir)/third-party/nfd/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(ProjectDir)/third-party/nfd/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(ProjectDir)/third-party/nfd/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -105,7 +105,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;thor-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;thor-d.lib;nfd_d.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -117,7 +117,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;thor-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;thor-d.lib;nfd_d.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -133,7 +133,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;thor-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;thor-d.lib;nfd_d.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -149,7 +149,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;thor-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;thor-d.lib;nfd_d.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
