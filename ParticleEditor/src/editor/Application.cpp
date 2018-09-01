@@ -105,19 +105,30 @@ namespace px
 	void Application::updateGUI()
 	{
 		// Simulation overlay
-		ImGui::SetNextWindowPos(ImVec2(700, 20));
-		ImGui::Begin("Overlay", NULL, ImVec2(0, 0), 0.3f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+		static std::string status = "Playing";
+
+		if (!m_emitterConnection.isConnected() && !m_particle.looping)
+			status = "Stopped";
+
+		ImGui::SetNextWindowPos(ImVec2(685, 12));
+		ImGui::Begin("Overlay", NULL, ImVec2(165, 0), 0.3f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
 		if (ImGui::ImageButton(m_playButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black))
 		{
 			m_playing = true;
+			if (m_playing) status = "Playing";
 			if (!m_particle.looping && !m_emitterConnection.isConnected()) // Play the emitter once when looping is disabled
 				m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration));
 		}
 		ImGui::SameLine();
 		if (ImGui::ImageButton(m_pauseButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black))
+		{
 			m_playing = !m_playing;
-		ImGui::Text("\nTime: 00:00");
+			m_playing == true ? status = "Playing" : status = "Paused";
+		}
+
+		ImGui::Text("\nPlayback Time: 0.00");
+		ImGui::Text("Status: %s", status.c_str());
 		ImGui::End();
 
 		// General properties
@@ -127,8 +138,10 @@ namespace px
 		ImGui::Spacing();
 		if (ImGui::Checkbox("Looping", &m_particle.looping))
 		{
-			if(!m_particle.looping)
+			if (!m_particle.looping)
 				m_emitterConnection.disconnect();
+			else
+				status = "Playing";
 		}
 		ImGui::Spacing();
 		ImGui::InputFloat("Duration", &m_particle.duration, 0.1f);
