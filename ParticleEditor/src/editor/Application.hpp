@@ -25,7 +25,9 @@ namespace px
 		void updateGUI();
 		void render();
 		void openTextureFile(std::string & filePath, std::string & file);
-		void outputParticleData();
+		void openParticleFile();
+		void saveParticleFile();
+		void outputParticleData(const std::string & filePath);
 
 	private:
 		struct Properties

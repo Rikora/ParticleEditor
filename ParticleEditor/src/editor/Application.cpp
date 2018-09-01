@@ -53,7 +53,6 @@ namespace px
 
 	Application::~Application()
 	{
-		outputParticleData();
 		ImGui::SFML::Shutdown();
 	}
 
@@ -178,6 +177,7 @@ namespace px
 
 				if (ImGui::MenuItem("Save as..", "CTRL+S"))
 				{
+					saveParticleFile();
 				}
 				ImGui::EndMenu();
 			}
@@ -406,7 +406,7 @@ namespace px
 		}
 	}
 
-	// File browser for selecting a texture
+	// File browser for selecting a particle texture
 	void Application::openTextureFile(std::string & filePath, std::string & file)
 	{
 		nfdchar_t* outPath = NULL;
@@ -426,10 +426,50 @@ namespace px
 			printf("Error: %s\n", NFD_GetError());
 	}
 
-	// Write particle data to json file
-	void Application::outputParticleData()
+	// File browser for selecting a particle file
+	void Application::openParticleFile()
 	{
-		std::string directory = "src/res/data/test.json";
+		nfdchar_t* outPath = NULL;
+		nfdresult_t result = NFD_OpenDialog("json", NULL, &outPath);
+
+		if (result == NFD_OKAY)
+		{
+			std::string filePath = outPath;
+			std::replace(filePath.begin(), filePath.end(), '\\', '/');
+			
+			// TODO: parse json file for particle data
+
+			free(outPath);
+		}
+		else if (result == NFD_CANCEL)
+			printf("User pressed cancel.\n");
+		else
+			printf("Error: %s\n", NFD_GetError());
+	}
+
+	// File browser for saving a particle file
+	void Application::saveParticleFile()
+	{
+		nfdchar_t *savePath = NULL;
+		nfdresult_t result = NFD_SaveDialog("json", NULL, &savePath);
+
+		if (result == NFD_OKAY)
+		{
+			std::string filePath = savePath;
+			std::replace(filePath.begin(), filePath.end(), '\\', '/');
+			outputParticleData(filePath);
+			printf("Saved file to: %s\n", savePath);
+			free(savePath);
+		}
+		else if (result == NFD_CANCEL)
+			printf("User pressed cancel.\n");
+		else
+			printf("Error: %s\n", NFD_GetError());
+	}
+
+	// Write particle data to json file
+	void Application::outputParticleData(const std::string & filePath)
+	{
 		auto enableFloat = [](const float & value) -> bool { return value == 0.f ? false : true; };
 		auto enableVec = [](const sf::Vector2f & vec) -> bool { return vec == sf::Vector2f(0.f, 0.f) ? false : true; };
 
@@ -465,7 +505,7 @@ namespace px
 			{ "shape", m_particle.shape },
 		};
 
-		std::ofstream o(directory);
+		std::ofstream o(filePath);
 		o << std::setw(4) << data << std::endl;
 	}
 }
