@@ -62,5 +62,6 @@ namespace px
 		thor::Connection m_torqueConnection;
 		thor::Connection m_forceConnection;
 		Properties m_particle;
+		bool m_playing = true;
 	};
 }

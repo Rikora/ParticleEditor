@@ -3,13 +3,13 @@
 ////////////////////////////////////////////////////////////
 #include <editor/Application.hpp>
 #include <utils/Utility.hpp>
-#include <iostream>
-#include <imgui.h>
-#include <imgui-SFML.h>
 #include <SFML/Window/Event.hpp>
 #include <Thor/Math.hpp>
 #include <Thor/Vectors/PolarVector2.hpp>
 #include <Thor/Animations/FadeAnimation.hpp>
+#include <iostream>
+#include <imgui.h>
+#include <imgui-SFML.h>
 #include <nfd.h>
 
 #define IM_ARRAYSIZE(_ARR) ((int)(sizeof(_ARR)/sizeof(*_ARR)))
@@ -98,19 +98,26 @@ namespace px
 		else
 			m_emitter.setParticlePosition(m_particle.position);
 
-		m_particleSystem.update(dt);
+		if(m_playing)
+			m_particleSystem.update(dt);
 	}
 
 	void Application::updateGUI()
 	{
-		// Simulation overlay when looping is off
+		// Simulation overlay
 		ImGui::SetNextWindowPos(ImVec2(700, 20));
-		ImGui::Begin("Overlay", NULL, ImVec2(100, 0), 0.3f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+		ImGui::Begin("Overlay", NULL, ImVec2(0, 0), 0.3f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
-		ImGui::ImageButton(m_playButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black);
+		if (ImGui::ImageButton(m_playButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black))
+		{
+			m_playing = true;
+			if (!m_particle.looping && !m_emitterConnection.isConnected()) // Play the emitter once when looping is disabled
+				m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration));
+		}
 		ImGui::SameLine();
-		ImGui::ImageButton(m_pauseButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black);
-		//ImGui::Text("\nTime: 00:00");
+		if (ImGui::ImageButton(m_pauseButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black))
+			m_playing = !m_playing;
+		ImGui::Text("\nTime: 00:00");
 		ImGui::End();
 
 		// General properties
@@ -118,7 +125,11 @@ namespace px
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);	
 		ImGui::Spacing();
-		ImGui::Checkbox("Looping", &m_particle.looping); // Should be a play once button when this is disabled
+		if (ImGui::Checkbox("Looping", &m_particle.looping))
+		{
+			if(!m_particle.looping)
+				m_emitterConnection.disconnect();
+		}
 		ImGui::Spacing();
 		ImGui::InputFloat("Duration", &m_particle.duration, 0.1f);
 		ImGui::Spacing();
@@ -311,8 +322,6 @@ namespace px
 
 		if (!m_emitterConnection.isConnected() && m_particle.looping)
 			m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration));
-		else if (!m_particle.looping)
-			m_emitterConnection.disconnect();
 	}
 
 	void Application::render()
