@@ -2,9 +2,9 @@
     "blendMode": 1,
     "circleRadius": 30.0,
     "color": [
-        122,
-        142,
-        73,
+        50,
+        159,
+        72,
         255
     ],
     "deflect": true,
@@ -25,11 +25,11 @@
         3.0
     ],
     "looping": true,
-    "maxRotation": 20.0,
+    "maxRotation": 15.0,
     "particles": 30.0,
     "position": [
         400.0,
-        400.0
+        600.0
     ],
     "rectHalfSize": [
         1.0,
@@ -44,8 +44,9 @@
         0.0
     ],
     "shape": "Circle",
+    "shapeItem": 1,
     "size": [
-        0.05000000074505806,
+        0.029999999329447746,
         0.05000000074505806
     ],
     "texture": "src/res/textures/particle.png",

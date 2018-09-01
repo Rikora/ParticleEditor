@@ -22,6 +22,8 @@ using nlohmann::json;
 namespace px
 {
 	int Application::m_blendItem = 0;
+	int Application::m_shapeItem = 0;
+	float Application::m_color[] = { 1.f, 1.f, 1.f };
 
 	inline thor::Distribution<sf::Vector2f> scaleDistribution(sf::Vector2f size)
 	{	
@@ -214,12 +216,11 @@ namespace px
 			ImGui::InputFloat2("Lifetime", &m_particle.lifetime.x, floatPrecision);
 			ImGui::Spacing();
 
-			static float color[3] = { 1.f, 1.f, 1.f };
-			if (ImGui::ColorEdit3("Color", color))
+			if (ImGui::ColorEdit3("Color", m_color))
 			{
-				m_particle.color.r = static_cast<sf::Uint8>(color[0] * 255.f);
-				m_particle.color.g = static_cast<sf::Uint8>(color[1] * 255.f);
-				m_particle.color.b = static_cast<sf::Uint8>(color[2] * 255.f);
+				m_particle.color.r = static_cast<sf::Uint8>(m_color[0] * 255.f);
+				m_particle.color.g = static_cast<sf::Uint8>(m_color[1] * 255.f);
+				m_particle.color.b = static_cast<sf::Uint8>(m_color[2] * 255.f);
 			}
 			ImGui::Spacing();
 
@@ -302,7 +303,6 @@ namespace px
 			if (ImGui::CollapsingHeader("Shape"))
 			{
 				ImGui::Spacing();
-				static int m_shapeItem = 0;
 				const char* itemList[] = { "None", "Circle", "Rectangle" };
 				ImGui::Combo("Shape##1", &m_shapeItem, itemList, IM_ARRAYSIZE(itemList));
 
@@ -479,6 +479,9 @@ namespace px
 		m_fullParticlePath = data["texture"].get<std::string>();
 		m_particle.looping = data["looping"].get<bool>();
 		m_particle.deflect = data["deflect"].get<bool>();
+		m_particle.enableTorqueAff = data["enableTorqueAff"].get<bool>();
+		m_particle.enableFadeAff = data["enableFadeAff"].get<bool>();
+		m_particle.enableForceAff = data["enableForceAff"].get<bool>();
 		m_particle.velocityPolarVector = data["velPolarVector"].get<bool>();
 		m_particle.duration = data["duration"].get<float>();
 		m_particle.radius = data["circleRadius"].get<float>();
@@ -497,12 +500,27 @@ namespace px
 		m_particle.color = sf::Color(data["color"][0].get<sf::Uint8>(), data["color"][1].get<sf::Uint8>(), 
 								     data["color"][2].get<sf::Uint8>(), data["color"][3].get<sf::Uint8>());
 		m_blendItem = data["blendMode"].get<int>();
+		m_shapeItem = data["shapeItem"].get<int>();
 		m_particle.shape = data["shape"].get<std::string>();
+
+		// Affectors
+		if (m_particle.enableTorqueAff)
+			m_torqueConnection = m_particleSystem.addAffector(thor::TorqueAffector(m_particle.torque));
+		if (m_particle.enableForceAff)
+			m_forceConnection = m_particleSystem.addAffector(thor::ForceAffector(m_particle.force));
+		if (m_particle.enableFadeAff)
+		{
+			thor::FadeAnimation fader(m_particle.fader.x, m_particle.fader.y);
+			m_fadeConnection = m_particleSystem.addAffector(thor::AnimationAffector(fader));
+		}
 
 		//Set texture
 		m_particle.texture.loadFromFile(m_fullParticlePath);
 		m_particleSystem.setTexture(m_particle.texture);
 		m_textureButton.setTexture(m_particle.texture);
+		m_color[0] = static_cast<float>(static_cast<float>(m_particle.color.r) / 255.f);
+		m_color[1] = static_cast<float>(static_cast<float>(m_particle.color.g) / 255.f);
+		m_color[2] = static_cast<float>(static_cast<float>(m_particle.color.b) / 255.f);
 	}
 
 	// Write particle data to json file
@@ -541,6 +559,7 @@ namespace px
 			{ "color", { m_particle.color.r, m_particle.color.g, m_particle.color.b, m_particle.color.a } },
 			{ "force", { m_particle.force.x, m_particle.force.y } },
 			{ "blendMode", m_blendItem },
+			{ "shapeItem", m_shapeItem },
 			{ "shape", m_particle.shape },
 		};
 

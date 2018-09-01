@@ -65,7 +65,9 @@ namespace px
 		sf::Texture m_playButtonTexture, m_pauseButtonTexture;
 		sf::Sprite m_textureButton, m_playButton, m_pauseButton;
 		bool m_playing;
+		static int m_shapeItem;
 		static int m_blendItem;
+		static float m_color[3];
 
 	private:
 		Properties m_particle;
