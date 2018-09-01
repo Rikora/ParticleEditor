@@ -81,19 +81,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(ProjectDir)/third-party/json/include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(ProjectDir)/third-party/nfd/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(ProjectDir)/third-party/json/include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(ProjectDir)/third-party/nfd/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(ProjectDir)/third-party/json/include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(ProjectDir)/third-party/nfd/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)/third-party/sfml/include;$(ProjectDir)/third-party/thor/include;$(ProjectDir)/third-party/imgui/include;$(ProjectDir)/third-party/nfd/include;$(ProjectDir)/src;$(ProjectDir)/third-party/json/include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)/third-party/sfml/lib;$(ProjectDir)/third-party/thor/lib;$(ProjectDir)/third-party/nfd/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

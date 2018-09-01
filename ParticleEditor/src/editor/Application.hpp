@@ -24,7 +24,8 @@ namespace px
 		void updateParticles(sf::Time dt);
 		void updateGUI();
 		void render();
-		void openFile(std::string & filePath, std::string & file);
+		void openTextureFile(std::string & filePath, std::string & file);
+		void outputParticleData();
 
 	private:
 		struct Properties
@@ -32,6 +33,9 @@ namespace px
 			bool looping = true;
 			bool deflect = false;
 			bool velocityPolarVector = false;
+			bool enableTorqueAff = false;
+			bool enableFadeAff = false;
+			bool enableForceAff = false;
 			float duration = 1.f;
 			float radius = 1.f;
 			float nrOfParticles = 1.f;
@@ -47,9 +51,9 @@ namespace px
 			sf::Vector2f fader = sf::Vector2f(0.f, 0.f);
 			sf::Vector2f force = sf::Vector2f(0.f, 0.f);
 			sf::Color color = sf::Color::White;
-			sf::Texture texture;
-			sf::BlendMode blendMode;
-			std::string shape;
+			sf::Texture texture = sf::Texture();
+			sf::BlendMode blendMode = sf::BlendNone;
+			std::string shape = "None";
 		};
 
 	private:
@@ -57,7 +61,8 @@ namespace px
 		std::string m_fullParticlePath, m_particlePath;
 		sf::Texture m_playButtonTexture, m_pauseButtonTexture;
 		sf::Sprite m_textureButton, m_playButton, m_pauseButton;
-		bool m_playing = true;
+		bool m_playing;
+		static int m_blendItem;
 
 	private:
 		Properties m_particle;

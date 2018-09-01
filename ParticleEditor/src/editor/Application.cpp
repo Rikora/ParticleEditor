@@ -8,14 +8,21 @@
 #include <Thor/Vectors/PolarVector2.hpp>
 #include <Thor/Animations/FadeAnimation.hpp>
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <nfd.h>
+#include <json.hpp>
 
 #define IM_ARRAYSIZE(_ARR) ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
+using nlohmann::json;
+
 namespace px
 {
+	int Application::m_blendItem = 0;
+
 	inline thor::Distribution<sf::Vector2f> scaleDistribution(sf::Vector2f size)
 	{	
 		return [=]() -> sf::Vector2f
@@ -26,7 +33,8 @@ namespace px
 	}
 
 	Application::Application() : m_window(sf::VideoMode(1200U, 800U), "Particle Editor", sf::Style::Close,
-										  sf::ContextSettings(0U, 0U, 8U)), m_particlePath("particle.png")
+										  sf::ContextSettings(0U, 0U, 8U)), m_particlePath("particle.png"),
+										  m_fullParticlePath("src/res/textures/particle.png"), m_playing(true)
 	{
 		m_window.setVerticalSyncEnabled(true);
 		ImGui::SFML::Init(m_window);
@@ -45,6 +53,7 @@ namespace px
 
 	Application::~Application()
 	{
+		outputParticleData();
 		ImGui::SFML::Shutdown();
 	}
 
@@ -318,7 +327,6 @@ namespace px
 			if (ImGui::CollapsingHeader("Renderer"))
 			{
 				ImGui::Spacing();
-				static int m_blendItem = 0;
 				const char* itemList[] = { "None", "BlendAdd", "BlendAlpha", "BlendMultiply" };
 				ImGui::Combo("Blend mode", &m_blendItem, itemList, IM_ARRAYSIZE(itemList));
 
@@ -345,7 +353,7 @@ namespace px
 				ImGui::Spacing();
 				if (ImGui::ImageButton(m_textureButton, sf::Vector2f(100.f, 100.f), -1, sf::Color::Black, m_particle.color))
 				{
-					openFile(m_fullParticlePath, m_particlePath);
+					openTextureFile(m_fullParticlePath, m_particlePath);
 					m_particle.texture.loadFromFile(m_fullParticlePath);
 					m_particleSystem.setTexture(m_particle.texture);
 					m_textureButton.setTexture(m_particle.texture);
@@ -398,8 +406,8 @@ namespace px
 		}
 	}
 
-	// File browser
-	void Application::openFile(std::string & filePath, std::string & file)
+	// File browser for selecting a texture
+	void Application::openTextureFile(std::string & filePath, std::string & file)
 	{
 		nfdchar_t* outPath = NULL;
 		nfdresult_t result = NFD_OpenDialog("png,jpg", NULL, &outPath);
@@ -416,5 +424,48 @@ namespace px
 			printf("User pressed cancel.\n");
 		else
 			printf("Error: %s\n", NFD_GetError());
+	}
+
+	// Write particle data to json file
+	void Application::outputParticleData()
+	{
+		std::string directory = "src/res/data/test.json";
+		auto enableFloat = [](const float & value) -> bool { return value == 0.f ? false : true; };
+		auto enableVec = [](const sf::Vector2f & vec) -> bool { return vec == sf::Vector2f(0.f, 0.f) ? false : true; };
+
+		m_particle.enableTorqueAff = enableFloat(m_particle.torque);
+		m_particle.enableFadeAff = enableVec(m_particle.fader);
+		m_particle.enableForceAff = enableVec(m_particle.force);
+
+		// Data
+		json data = {
+			{ "texture", m_fullParticlePath },
+			{ "looping", m_particle.looping },
+			{ "deflect", m_particle.deflect },
+			{ "velPolarVector", m_particle.velocityPolarVector },
+			{ "enableTorqueAff", m_particle.enableTorqueAff },
+			{ "enableFadeAff", m_particle.enableFadeAff },
+			{ "enableForceAff", m_particle.enableForceAff },
+			{ "duration", m_particle.duration },
+			{ "circleRadius",  m_particle.radius},
+			{ "particles", m_particle.nrOfParticles },
+			{ "torque",  m_particle.torque},
+			{ "maxRotation", m_particle.maxRotation },
+			{ "rotation", m_particle.rotation.x, m_particle.rotation.y },
+			{ "lifetime", m_particle.lifetime.x, m_particle.lifetime.y },
+			{ "rectHalfSize", m_particle.halfSize.x, m_particle.halfSize.y },
+			{ "position", m_particle.position.x, m_particle.position.y },
+			{ "size", m_particle.size.x, m_particle.size.y },
+			{ "velocity", m_particle.velocity.x, m_particle.velocity.y },
+			{ "fader", m_particle.fader.x, m_particle.fader.y },
+			{ "force", m_particle.force.x, m_particle.force.y },
+			{ "color", m_particle.color.r, m_particle.color.g, m_particle.color.b, m_particle.color.a },
+			{ "force", m_particle.force.x, m_particle.force.y },
+			{ "blendMode", m_blendItem },
+			{ "shape", m_particle.shape },
+		};
+
+		std::ofstream o(directory);
+		o << std::setw(4) << data << std::endl;
 	}
 }
