@@ -40,6 +40,7 @@ namespace px
 		m_textureButton.setTexture(m_particleTexture);
 		m_particleSystem.setTexture(m_particleTexture);
 		m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration)); 
+		m_playbackWatch.start();
 	}
 
 	Application::~Application()
@@ -108,7 +109,10 @@ namespace px
 		static std::string status = "Playing";
 
 		if (!m_emitterConnection.isConnected() && !m_particle.looping)
+		{
 			status = "Stopped";
+			m_playbackWatch.reset();
+		}
 
 		ImGui::SetNextWindowPos(ImVec2(685, 12));
 		ImGui::Begin("Overlay", NULL, ImVec2(165, 0), 0.3f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
@@ -116,7 +120,13 @@ namespace px
 		if (ImGui::ImageButton(m_playButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black))
 		{
 			m_playing = true;
-			if (m_playing) status = "Playing";
+			if (m_playing)
+			{
+				status = "Playing";
+				if (!m_playbackWatch.isRunning())
+					m_playbackWatch.start();
+			}
+
 			if (!m_particle.looping && !m_emitterConnection.isConnected()) // Play the emitter once when looping is disabled
 				m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration));
 		}
@@ -124,10 +134,24 @@ namespace px
 		if (ImGui::ImageButton(m_pauseButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black))
 		{
 			m_playing = !m_playing;
-			m_playing == true ? status = "Playing" : status = "Paused";
-		}
 
-		ImGui::Text("\nPlayback Time: 0.00");
+			if (m_playing)
+			{
+				status = "Playing";
+				if (!m_playbackWatch.isRunning())
+					m_playbackWatch.start();
+			}
+			else
+			{
+				status = "Paused";
+				if (m_playbackWatch.isRunning())
+					m_playbackWatch.stop();
+			}
+		}
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Text("Playback Time: %.2f", m_playbackWatch.getElapsedTime().asSeconds());
 		ImGui::Text("Status: %s", status.c_str());
 		ImGui::End();
 
@@ -141,7 +165,11 @@ namespace px
 			if (!m_particle.looping)
 				m_emitterConnection.disconnect();
 			else
+			{
 				status = "Playing";
+				if (!m_playbackWatch.isRunning())
+					m_playbackWatch.start();
+			}
 		}
 		ImGui::Spacing();
 		ImGui::InputFloat("Duration", &m_particle.duration, 0.1f);

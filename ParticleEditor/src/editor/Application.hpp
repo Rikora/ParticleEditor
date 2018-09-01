@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Graphics.hpp>
 #include <Thor/Particles.hpp>
+#include <Thor/Time/StopWatch.hpp>
 
 namespace px
 {
@@ -61,6 +62,7 @@ namespace px
 		thor::Connection m_fadeConnection;
 		thor::Connection m_torqueConnection;
 		thor::Connection m_forceConnection;
+		thor::StopWatch m_playbackWatch;
 		Properties m_particle;
 		bool m_playing = true;
 	};
