@@ -27,6 +27,7 @@ namespace px
 		void openTextureFile(std::string & filePath, std::string & file);
 		void openParticleFile();
 		void saveParticleFile();
+		void loadParticleData(const std::string & filePath);
 		void outputParticleData(const std::string & filePath);
 
 	private:

@@ -1,32 +1,32 @@
 {
-    "blendMode": 0,
-    "circleRadius": 1.0,
+    "blendMode": 1,
+    "circleRadius": 30.0,
     "color": [
-        255,
-        255,
-        255,
+        122,
+        142,
+        73,
         255
     ],
-    "deflect": false,
+    "deflect": true,
     "duration": 1.0,
-    "enableFadeAff": false,
-    "enableForceAff": false,
+    "enableFadeAff": true,
+    "enableForceAff": true,
     "enableTorqueAff": false,
     "fader": [
-        0.0,
-        0.0
+        0.15000000596046448,
+        0.15000000596046448
     ],
     "force": [
         0.0,
-        0.0
+        200.0
     ],
     "lifetime": [
-        1.0,
-        1.0
+        3.0,
+        3.0
     ],
     "looping": true,
-    "maxRotation": 0.0,
-    "particles": 1.0,
+    "maxRotation": 20.0,
+    "particles": 30.0,
     "position": [
         400.0,
         400.0
@@ -43,16 +43,16 @@
         0.0,
         0.0
     ],
-    "shape": "None",
+    "shape": "Circle",
     "size": [
         0.05000000074505806,
         0.05000000074505806
     ],
     "texture": "src/res/textures/particle.png",
     "torque": 0.0,
-    "velPolarVector": false,
+    "velPolarVector": true,
     "velocity": [
-        0.0,
-        0.0
+        300.0,
+        -90.0
     ]
 }

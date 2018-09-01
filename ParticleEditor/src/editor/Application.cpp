@@ -42,11 +42,13 @@ namespace px
 		// Load texture
 		m_playButtonTexture.loadFromFile("src/res/textures/icons/play_button.png");
 		m_pauseButtonTexture.loadFromFile("src/res/textures/icons/pause_button.png");
-		m_particle.texture.loadFromFile("src/res/textures/particle.png");
+		m_particle.texture.loadFromFile(m_fullParticlePath);
 		m_playButton.setTexture(m_playButtonTexture);
 		m_pauseButton.setTexture(m_pauseButtonTexture);
 		m_textureButton.setTexture(m_particle.texture);
 		m_particleSystem.setTexture(m_particle.texture);
+
+		// Apply the emitter and start playback time
 		m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration)); 
 		m_playbackWatch.start();
 	}
@@ -173,6 +175,7 @@ namespace px
 			{
 				if (ImGui::MenuItem("Open..", "CTRL+O")) 
 				{
+					openParticleFile();
 				}
 
 				if (ImGui::MenuItem("Save as..", "CTRL+S"))
@@ -436,9 +439,7 @@ namespace px
 		{
 			std::string filePath = outPath;
 			std::replace(filePath.begin(), filePath.end(), '\\', '/');
-			
-			// TODO: parse json file for particle data
-
+			loadParticleData(filePath);
 			free(outPath);
 		}
 		else if (result == NFD_CANCEL)
@@ -467,6 +468,43 @@ namespace px
 			printf("Error: %s\n", NFD_GetError());
 	}
 
+	// Load particle data from json file
+	void Application::loadParticleData(const std::string & filePath)
+	{
+		std::ifstream i(filePath);
+		json data;
+		i >> data;
+				
+		// Data
+		m_fullParticlePath = data["texture"].get<std::string>();
+		m_particle.looping = data["looping"].get<bool>();
+		m_particle.deflect = data["deflect"].get<bool>();
+		m_particle.velocityPolarVector = data["velPolarVector"].get<bool>();
+		m_particle.duration = data["duration"].get<float>();
+		m_particle.radius = data["circleRadius"].get<float>();
+		m_particle.nrOfParticles = data["particles"].get<float>();
+		m_particle.torque = data["torque"].get<float>();
+		m_particle.maxRotation = data["maxRotation"].get<float>();
+		m_particle.rotationSpeed = sf::Vector2f(data["rotationSpeed"][0].get<float>(), data["rotationSpeed"][1].get<float>());
+		m_particle.rotation = sf::Vector2f(data["rotation"][0].get<float>(), data["rotation"][1].get<float>());
+		m_particle.lifetime = sf::Vector2f(data["lifetime"][0].get<float>(), data["lifetime"][1].get<float>());
+		m_particle.halfSize = sf::Vector2f(data["rectHalfSize"][0].get<float>(), data["rectHalfSize"][1].get<float>());
+		m_particle.position = sf::Vector2f(data["position"][0].get<float>(), data["position"][1].get<float>());
+		m_particle.size = sf::Vector2f(data["size"][0].get<float>(), data["size"][1].get<float>());
+		m_particle.velocity = sf::Vector2f(data["velocity"][0].get<float>(), data["velocity"][1].get<float>());
+		m_particle.fader = sf::Vector2f(data["fader"][0].get<float>(), data["fader"][1].get<float>());
+		m_particle.force = sf::Vector2f(data["force"][0].get<float>(), data["force"][1].get<float>());
+		m_particle.color = sf::Color(data["color"][0].get<sf::Uint8>(), data["color"][1].get<sf::Uint8>(), 
+								     data["color"][2].get<sf::Uint8>(), data["color"][3].get<sf::Uint8>());
+		m_blendItem = data["blendMode"].get<int>();
+		m_particle.shape = data["shape"].get<std::string>();
+
+		//Set texture
+		m_particle.texture.loadFromFile(m_fullParticlePath);
+		m_particleSystem.setTexture(m_particle.texture);
+		m_textureButton.setTexture(m_particle.texture);
+	}
+
 	// Write particle data to json file
 	void Application::outputParticleData(const std::string & filePath)
 	{
@@ -489,18 +527,19 @@ namespace px
 			{ "duration", m_particle.duration },
 			{ "circleRadius",  m_particle.radius},
 			{ "particles", m_particle.nrOfParticles },
-			{ "torque",  m_particle.torque},
+			{ "torque",  m_particle.torque },
 			{ "maxRotation", m_particle.maxRotation },
-			{ "rotation", m_particle.rotation.x, m_particle.rotation.y },
-			{ "lifetime", m_particle.lifetime.x, m_particle.lifetime.y },
-			{ "rectHalfSize", m_particle.halfSize.x, m_particle.halfSize.y },
-			{ "position", m_particle.position.x, m_particle.position.y },
-			{ "size", m_particle.size.x, m_particle.size.y },
-			{ "velocity", m_particle.velocity.x, m_particle.velocity.y },
-			{ "fader", m_particle.fader.x, m_particle.fader.y },
-			{ "force", m_particle.force.x, m_particle.force.y },
-			{ "color", m_particle.color.r, m_particle.color.g, m_particle.color.b, m_particle.color.a },
-			{ "force", m_particle.force.x, m_particle.force.y },
+			{ "rotationSpeed", { m_particle.rotationSpeed.x, m_particle.rotationSpeed.y } },
+			{ "rotation", { m_particle.rotation.x, m_particle.rotation.y } },
+			{ "lifetime", { m_particle.lifetime.x, m_particle.lifetime.y } },
+			{ "rectHalfSize", { m_particle.halfSize.x, m_particle.halfSize.y } },
+			{ "position", { m_particle.position.x, m_particle.position.y } },
+			{ "size", { m_particle.size.x, m_particle.size.y } },
+			{ "velocity", { m_particle.velocity.x, m_particle.velocity.y } },
+			{ "fader", { m_particle.fader.x, m_particle.fader.y } },
+			{ "force", { m_particle.force.x, m_particle.force.y } },
+			{ "color", { m_particle.color.r, m_particle.color.g, m_particle.color.b, m_particle.color.a } },
+			{ "force", { m_particle.force.x, m_particle.force.y } },
 			{ "blendMode", m_blendItem },
 			{ "shape", m_particle.shape },
 		};
