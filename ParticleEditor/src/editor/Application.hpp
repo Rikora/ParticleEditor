@@ -47,15 +47,20 @@ namespace px
 			sf::Vector2f fader = sf::Vector2f(0.f, 0.f);
 			sf::Vector2f force = sf::Vector2f(0.f, 0.f);
 			sf::Color color = sf::Color::White;
+			sf::Texture texture;
+			sf::BlendMode blendMode;
 			std::string shape;
 		};
 
 	private:
 		sf::RenderWindow m_window;
 		std::string m_fullParticlePath, m_particlePath;
-		sf::Texture m_particleTexture, m_playButtonTexture, m_pauseButtonTexture;
+		sf::Texture m_playButtonTexture, m_pauseButtonTexture;
 		sf::Sprite m_textureButton, m_playButton, m_pauseButton;
-		sf::BlendMode m_blendMode;
+		bool m_playing = true;
+
+	private:
+		Properties m_particle;
 		thor::ParticleSystem m_particleSystem;
 		thor::UniversalEmitter m_emitter;
 		thor::Connection m_emitterConnection;
@@ -63,7 +68,5 @@ namespace px
 		thor::Connection m_torqueConnection;
 		thor::Connection m_forceConnection;
 		thor::StopWatch m_playbackWatch;
-		Properties m_particle;
-		bool m_playing = true;
 	};
 }

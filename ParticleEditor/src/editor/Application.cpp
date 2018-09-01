@@ -34,11 +34,11 @@ namespace px
 		// Load texture
 		m_playButtonTexture.loadFromFile("src/res/textures/icons/play_button.png");
 		m_pauseButtonTexture.loadFromFile("src/res/textures/icons/pause_button.png");
-		m_particleTexture.loadFromFile("src/res/textures/particle.png");
+		m_particle.texture.loadFromFile("src/res/textures/particle.png");
 		m_playButton.setTexture(m_playButtonTexture);
 		m_pauseButton.setTexture(m_pauseButtonTexture);
-		m_textureButton.setTexture(m_particleTexture);
-		m_particleSystem.setTexture(m_particleTexture);
+		m_textureButton.setTexture(m_particle.texture);
+		m_particleSystem.setTexture(m_particle.texture);
 		m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration)); 
 		m_playbackWatch.start();
 	}
@@ -114,9 +114,10 @@ namespace px
 			m_playbackWatch.reset();
 		}
 
-		ImGui::SetNextWindowPos(ImVec2(685, 12));
+		ImGui::SetNextWindowPos(ImVec2(650, 25));
 		ImGui::Begin("Overlay", NULL, ImVec2(165, 0), 0.3f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+		ImGui::SetCursorPos(ImVec2(52, 10)); // Center buttons
 		if (ImGui::ImageButton(m_playButton, sf::Vector2f(20.f, 25.f), 1, sf::Color::Black))
 		{
 			m_playing = true;
@@ -158,195 +159,206 @@ namespace px
 		// General properties
 		static int floatPrecision = 3;
 		const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
-		ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);	
-		ImGui::Spacing();
-		if (ImGui::Checkbox("Looping", &m_particle.looping))
+		if (ImGui::BeginMainMenuBar())
 		{
-			if (!m_particle.looping)
-				m_emitterConnection.disconnect();
-			else
+			if (ImGui::BeginMenu("File"))
 			{
-				status = "Playing";
-				if (!m_playbackWatch.isRunning())
-					m_playbackWatch.start();
+				if (ImGui::MenuItem("Open..", "CTRL+O")) 
+				{
+				}
+
+				if (ImGui::MenuItem("Save as..", "CTRL+S"))
+				{
+				}
+				ImGui::EndMenu();
 			}
-		}
-		ImGui::Spacing();
-		ImGui::InputFloat("Duration", &m_particle.duration, 0.1f);
-		ImGui::Spacing();
-		ImGui::InputFloat("Particles", &m_particle.nrOfParticles, 1.f);
-		ImGui::Spacing();
-		ImGui::InputFloat2("Position", &m_particle.position.x, floatPrecision);
-		ImGui::Spacing();
-		ImGui::InputFloat2("Size", &m_particle.size.x, floatPrecision);
-		ImGui::Spacing();
-		ImGui::InputFloat2("Rotation", &m_particle.rotation.x, floatPrecision);
-		ImGui::Spacing();
-		ImGui::InputFloat2("Rotation Speed", &m_particle.rotationSpeed.x, floatPrecision);
-		ImGui::Spacing();
-		ImGui::InputFloat2("Lifetime", &m_particle.lifetime.x, floatPrecision);
-		ImGui::Spacing();
-	
-		static float color[3] = { 1.f, 1.f, 1.f };
-		if (ImGui::ColorEdit3("Color", color))
-		{
-			m_particle.color.r = static_cast<sf::Uint8>(color[0] * 255.f);
-			m_particle.color.g = static_cast<sf::Uint8>(color[1] * 255.f);
-			m_particle.color.b = static_cast<sf::Uint8>(color[2] * 255.f);
-		}
-		ImGui::Spacing();
 
-		// Alpha over lifetime
-		ImGui::SetNextTreeNodeOpen(true, 2);
-		if (ImGui::CollapsingHeader("Alpha over Lifetime"))
-		{
+			ImGui::Begin("Particle System", NULL, ImVec2(0, 0), 1.0f, flags);
 			ImGui::Spacing();
-			if (ImGui::InputFloat2("Alpha", &m_particle.fader.x, floatPrecision))
+			if (ImGui::Checkbox("Looping", &m_particle.looping))
 			{
-				utils::clampVec(m_particle.fader, 0.f, 1.f);
-
-				// Time interval between [0, 1]
-				if (m_particle.fader.x + m_particle.fader.y > 1.f)
-					m_particle.fader = sf::Vector2f(0.f, 0.f);
-
-				// Make sure we don't add more than one animation affector
-				if (m_fadeConnection.isConnected())
-					m_fadeConnection.disconnect();
-
-				thor::FadeAnimation fader(m_particle.fader.x, m_particle.fader.y);
-				m_fadeConnection = m_particleSystem.addAffector(thor::AnimationAffector(fader));
+				if (!m_particle.looping)
+					m_emitterConnection.disconnect();
+				else
+				{
+					status = "Playing";
+					if (!m_playbackWatch.isRunning())
+						m_playbackWatch.start();
+				}
 			}
 			ImGui::Spacing();
-		}
-		ImGui::Spacing();
+			ImGui::InputFloat("Duration", &m_particle.duration, 0.1f);
+			ImGui::Spacing();
+			ImGui::InputFloat("Particles", &m_particle.nrOfParticles, 1.f);
+			ImGui::Spacing();
+			ImGui::InputFloat2("Position", &m_particle.position.x, floatPrecision);
+			ImGui::Spacing();
+			ImGui::InputFloat2("Size", &m_particle.size.x, floatPrecision);
+			ImGui::Spacing();
+			ImGui::InputFloat2("Rotation", &m_particle.rotation.x, floatPrecision);
+			ImGui::Spacing();
+			ImGui::InputFloat2("Rotation Speed", &m_particle.rotationSpeed.x, floatPrecision);
+			ImGui::Spacing();
+			ImGui::InputFloat2("Lifetime", &m_particle.lifetime.x, floatPrecision);
+			ImGui::Spacing();
 
-		// Velocity over lifetime
-		ImGui::SetNextTreeNodeOpen(true, 2);
-		if (ImGui::CollapsingHeader("Velocity over Lifetime"))
-		{
-			ImGui::Spacing();
-			ImGui::Checkbox("Deflect", &m_particle.deflect);
-			ImGui::Spacing();
-			if (ImGui::Checkbox("Use Polar Vector", &m_particle.velocityPolarVector))
-				m_particle.velocity = sf::Vector2f(0.f, 0.f);
-			ImGui::Spacing();
-			ImGui::InputFloat2("Velocity", &m_particle.velocity.x, floatPrecision);	
-			ImGui::Spacing();
-
-			if (m_particle.deflect)
+			static float color[3] = { 1.f, 1.f, 1.f };
+			if (ImGui::ColorEdit3("Color", color))
 			{
-				ImGui::InputFloat("Max rotation", &m_particle.maxRotation, 1.f);
+				m_particle.color.r = static_cast<sf::Uint8>(color[0] * 255.f);
+				m_particle.color.g = static_cast<sf::Uint8>(color[1] * 255.f);
+				m_particle.color.b = static_cast<sf::Uint8>(color[2] * 255.f);
+			}
+			ImGui::Spacing();
+
+			// Alpha over lifetime
+			if (ImGui::CollapsingHeader("Alpha over Lifetime"))
+			{
 				ImGui::Spacing();
-			}			
-		}
-		ImGui::Spacing();
+				if (ImGui::InputFloat2("Alpha", &m_particle.fader.x, floatPrecision))
+				{
+					utils::clampVec(m_particle.fader, 0.f, 1.f);
 
-		// Force over lifetime
-		ImGui::SetNextTreeNodeOpen(true, 2);
-		if (ImGui::CollapsingHeader("Force over Lifetime"))
-		{
-			ImGui::Spacing();
-			if (ImGui::InputFloat2("Force", &m_particle.force.x, floatPrecision))
-			{
-				// Make sure we don't add more than one force affector
-				if (m_forceConnection.isConnected())
-					m_forceConnection.disconnect();
+					// Time interval between [0, 1]
+					if (m_particle.fader.x + m_particle.fader.y > 1.f)
+						m_particle.fader = sf::Vector2f(0.f, 0.f);
 
-				m_forceConnection = m_particleSystem.addAffector(thor::ForceAffector(m_particle.force));
-			}
-			ImGui::Spacing();
-		}
-		ImGui::Spacing();
+					// Make sure we don't add more than one animation affector
+					if (m_fadeConnection.isConnected())
+						m_fadeConnection.disconnect();
 
-		// Torque over lifetime
-		ImGui::SetNextTreeNodeOpen(true, 2);
-		if (ImGui::CollapsingHeader("Torque over Lifetime"))
-		{
-			ImGui::Spacing();
-			if (ImGui::InputFloat("Torque", &m_particle.torque, 1.f))
-			{
-				// Make sure we don't add more than one torque affector
-				if (m_torqueConnection.isConnected())
-					m_torqueConnection.disconnect();
-
-				m_torqueConnection = m_particleSystem.addAffector(thor::TorqueAffector(m_particle.torque));		
-			}
-			ImGui::Spacing();
-		}
-		ImGui::Spacing();
-
-		// Shape
-		ImGui::SetNextTreeNodeOpen(true, 2);
-		if (ImGui::CollapsingHeader("Shape"))
-		{
-			ImGui::Spacing();
-			static int m_shapeItem = 0;
-			const char* itemList[] = { "None", "Circle", "Rectangle" };
-			ImGui::Combo("Shape##1", &m_shapeItem, itemList, IM_ARRAYSIZE(itemList));
-
-			if (m_shapeItem == 1)
-			{
-				m_particle.shape = "Circle";
-				ImGui::Spacing();
-				ImGui::InputFloat("Radius", &m_particle.radius, 1.f);
+					thor::FadeAnimation fader(m_particle.fader.x, m_particle.fader.y);
+					m_fadeConnection = m_particleSystem.addAffector(thor::AnimationAffector(fader));
+				}
 				ImGui::Spacing();
 			}
-			else if (m_shapeItem == 2)
+			ImGui::Spacing();
+
+			// Velocity over lifetime
+			if (ImGui::CollapsingHeader("Velocity over Lifetime"))
 			{
-				m_particle.shape = "Rectangle";
 				ImGui::Spacing();
-				ImGui::InputFloat2("Half size", &m_particle.halfSize.x, floatPrecision);
+				ImGui::Checkbox("Deflect", &m_particle.deflect);
+				ImGui::Spacing();
+				if (ImGui::Checkbox("Use Polar Vector", &m_particle.velocityPolarVector))
+					m_particle.velocity = sf::Vector2f(0.f, 0.f);
+				ImGui::Spacing();
+				ImGui::InputFloat2("Velocity", &m_particle.velocity.x, floatPrecision);
+				ImGui::Spacing();
+
+				if (m_particle.deflect)
+				{
+					ImGui::InputFloat("Max rotation", &m_particle.maxRotation, 1.f);
+					ImGui::Spacing();
+				}
+			}
+			ImGui::Spacing();
+
+			// Force over lifetime
+			if (ImGui::CollapsingHeader("Force over Lifetime"))
+			{
+				ImGui::Spacing();
+				if (ImGui::InputFloat2("Force", &m_particle.force.x, floatPrecision))
+				{
+					// Make sure we don't add more than one force affector
+					if (m_forceConnection.isConnected())
+						m_forceConnection.disconnect();
+
+					m_forceConnection = m_particleSystem.addAffector(thor::ForceAffector(m_particle.force));
+				}
 				ImGui::Spacing();
 			}
-			else
-				m_particle.shape = "None";
-		}
-		ImGui::Spacing();
-
-		// Renderer
-		ImGui::SetNextTreeNodeOpen(true, 2);
-		if (ImGui::CollapsingHeader("Renderer"))
-		{
 			ImGui::Spacing();
-			static int m_blendItem = 0;
-			const char* itemList[] = { "None", "BlendAdd", "BlendAlpha", "BlendMultiply" };
-			ImGui::Combo("Blend mode", &m_blendItem, itemList, IM_ARRAYSIZE(itemList));
 
-			switch (m_blendItem)
+			// Torque over lifetime
+			if (ImGui::CollapsingHeader("Torque over Lifetime"))
 			{
-			case 0:
-				m_blendMode = sf::BlendNone;
-				break;
-			case 1:
-				m_blendMode = sf::BlendAdd;
-				break;
-			case 2:
-				m_blendMode = sf::BlendAlpha;
-				break;
-			case 3:
-				m_blendMode = sf::BlendMultiply;
-				break;
-			default:
-				break;
-			}
+				ImGui::Spacing();
+				if (ImGui::InputFloat("Torque", &m_particle.torque, 1.f))
+				{
+					// Make sure we don't add more than one torque affector
+					if (m_torqueConnection.isConnected())
+						m_torqueConnection.disconnect();
 
+					m_torqueConnection = m_particleSystem.addAffector(thor::TorqueAffector(m_particle.torque));
+				}
+				ImGui::Spacing();
+			}
 			ImGui::Spacing();
-			ImGui::Separator();
-			ImGui::Spacing();
-			if (ImGui::ImageButton(m_textureButton, sf::Vector2f(100.f, 100.f), -1, sf::Color::Black, m_particle.color))
+
+			// Shape
+			if (ImGui::CollapsingHeader("Shape"))
 			{
-				openFile(m_fullParticlePath, m_particlePath);
-				m_particleTexture.loadFromFile(m_fullParticlePath);
-				m_particleSystem.setTexture(m_particleTexture);
-				m_textureButton.setTexture(m_particleTexture);
-			}
-			ImGui::Text(m_particlePath.c_str());
-			ImGui::Spacing();
-			ImGui::Separator();
-		}
-		ImGui::Spacing();
-		ImGui::End();
+				ImGui::Spacing();
+				static int m_shapeItem = 0;
+				const char* itemList[] = { "None", "Circle", "Rectangle" };
+				ImGui::Combo("Shape##1", &m_shapeItem, itemList, IM_ARRAYSIZE(itemList));
 
+				if (m_shapeItem == 1)
+				{
+					m_particle.shape = "Circle";
+					ImGui::Spacing();
+					ImGui::InputFloat("Radius", &m_particle.radius, 1.f);
+					ImGui::Spacing();
+				}
+				else if (m_shapeItem == 2)
+				{
+					m_particle.shape = "Rectangle";
+					ImGui::Spacing();
+					ImGui::InputFloat2("Half size", &m_particle.halfSize.x, floatPrecision);
+					ImGui::Spacing();
+				}
+				else
+					m_particle.shape = "None";
+			}
+			ImGui::Spacing();
+
+			// Renderer
+			ImGui::SetNextTreeNodeOpen(true, 2);
+			if (ImGui::CollapsingHeader("Renderer"))
+			{
+				ImGui::Spacing();
+				static int m_blendItem = 0;
+				const char* itemList[] = { "None", "BlendAdd", "BlendAlpha", "BlendMultiply" };
+				ImGui::Combo("Blend mode", &m_blendItem, itemList, IM_ARRAYSIZE(itemList));
+
+				switch (m_blendItem)
+				{
+				case 0:
+					m_particle.blendMode = sf::BlendNone;
+					break;
+				case 1:
+					m_particle.blendMode = sf::BlendAdd;
+					break;
+				case 2:
+					m_particle.blendMode = sf::BlendAlpha;
+					break;
+				case 3:
+					m_particle.blendMode = sf::BlendMultiply;
+					break;
+				default:
+					break;
+				}
+
+				ImGui::Spacing();
+				ImGui::Separator();
+				ImGui::Spacing();
+				if (ImGui::ImageButton(m_textureButton, sf::Vector2f(100.f, 100.f), -1, sf::Color::Black, m_particle.color))
+				{
+					openFile(m_fullParticlePath, m_particlePath);
+					m_particle.texture.loadFromFile(m_fullParticlePath);
+					m_particleSystem.setTexture(m_particle.texture);
+					m_textureButton.setTexture(m_particle.texture);
+				}
+				ImGui::Text(m_particlePath.c_str());
+				ImGui::Spacing();
+				ImGui::Separator();
+			}
+			ImGui::Spacing();
+			ImGui::End();
+			ImGui::EndMainMenuBar();
+		}
+		
 		// Prevent the editor from crashing on undefined behavior
 		utils::constrainNegatives(m_particle.maxRotation);
 		utils::constrainNegatives(m_particle.duration);
@@ -368,7 +380,7 @@ namespace px
 	void Application::render()
 	{
 		m_window.clear();
-		m_blendMode == sf::BlendNone ? m_window.draw(m_particleSystem) : m_window.draw(m_particleSystem, m_blendMode);
+		m_particle.blendMode == sf::BlendNone ? m_window.draw(m_particleSystem) : m_window.draw(m_particleSystem, m_particle.blendMode);
 		ImGui::SFML::Render(m_window);
 		m_window.display();
 	}
