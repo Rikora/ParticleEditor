@@ -11,11 +11,12 @@
 namespace sf
 {
 	class Color;
+	class RenderTarget;
 }
 
 namespace px
 {
-	class ParticleLoader
+	class ParticleLoader : public sf::Drawable
 	{
 	public:
 		ParticleLoader(const std::string & filePath, const sf::Vector2f & position);
@@ -50,6 +51,10 @@ namespace px
 			std::string shape = "None";
 			std::string fullParticlePath;
 		};
+
+	public:
+		void update(sf::Time dt);
+		virtual void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
 	private:
 		void loadParticleData(const std::string & filePath, const sf::Vector2f & position);

@@ -499,6 +499,7 @@ namespace px
 		std::ifstream i(filePath);
 		json data;
 		i >> data;
+		i.close();
 				
 		// Data
 		m_particle.fullParticlePath = data["texture"].get<std::string>();

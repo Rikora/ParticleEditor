@@ -1,9 +1,12 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <loader/ParticleLoader.hpp>
+#include "ParticleLoader.hpp"
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
 #include <Thor/Animations/FadeAnimation.hpp>
+#include <Thor/Math.hpp>
+#include <Thor/Vectors/PolarVector2.hpp>
 #include <fstream>
 #include <iomanip>
 #include <json.hpp>
@@ -12,6 +15,15 @@ using nlohmann::json;
 
 namespace px
 {
+	inline thor::Distribution<sf::Vector2f> scaleDistribution(sf::Vector2f size)
+	{
+		return [=]() -> sf::Vector2f
+		{
+			auto res = thor::random(size.x, size.y);
+			return sf::Vector2f(res, res);
+		};
+	}
+
 	ParticleLoader::ParticleLoader(const std::string & filePath, const sf::Vector2f & position)
 	{
 		loadParticleData(filePath, position);
@@ -22,6 +34,7 @@ namespace px
 		std::ifstream i(filePath);
 		json data;
 		i >> data;
+		i.close();
 
 		// Data
 		m_particle.position = position;
@@ -82,6 +95,48 @@ namespace px
 		// Set texture and prepare emitter
 		m_particle.texture.loadFromFile(m_particle.fullParticlePath);
 		m_particleSystem.setTexture(m_particle.texture);
-		m_particle.looping ? m_particleSystem.addEmitter(m_emitter) : m_particleSystem.addEmitter(m_emitter, sf::seconds(m_particle.duration));
+		m_particle.looping ? m_particleSystem.addEmitter(thor::refEmitter(m_emitter)) : 
+							 m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration));
+	}
+
+	void ParticleLoader::update(sf::Time dt)
+	{
+		// Update emitter
+		m_emitter.setEmissionRate(m_particle.nrOfParticles);
+		m_emitter.setParticleLifetime(thor::Distributions::uniform(sf::seconds(m_particle.lifetime.x), sf::seconds(m_particle.lifetime.y)));
+		m_emitter.setParticleScale(scaleDistribution(m_particle.size));
+		m_emitter.setParticleRotation(thor::Distributions::uniform(m_particle.rotation.x, m_particle.rotation.y));
+		m_emitter.setParticleRotationSpeed(thor::Distributions::uniform(m_particle.rotationSpeed.x, m_particle.rotationSpeed.y));
+		m_emitter.setParticleColor(m_particle.color);
+
+		if (m_particle.velocityPolarVector)
+		{
+			if (m_particle.deflect)
+				m_emitter.setParticleVelocity(thor::Distributions::deflect(
+					thor::PolarVector2f(m_particle.velocity.x, m_particle.velocity.y), m_particle.maxRotation));
+			else
+				m_emitter.setParticleVelocity(thor::PolarVector2f(m_particle.velocity.x, m_particle.velocity.y));
+		}
+		else
+		{
+			if (m_particle.deflect)
+				m_emitter.setParticleVelocity(thor::Distributions::deflect(m_particle.velocity, m_particle.maxRotation));
+			else
+				m_emitter.setParticleVelocity(m_particle.velocity);
+		}
+
+		if (m_particle.shape == "Circle")
+			m_emitter.setParticlePosition(thor::Distributions::circle(m_particle.position, m_particle.radius));
+		else if (m_particle.shape == "Rectangle")
+			m_emitter.setParticlePosition(thor::Distributions::rect(m_particle.position, m_particle.halfSize));
+		else
+			m_emitter.setParticlePosition(m_particle.position);
+
+		m_particleSystem.update(dt);
+	}
+
+	void ParticleLoader::draw(sf::RenderTarget & target, sf::RenderStates states) const
+	{
+		m_particle.blendMode == sf::BlendNone ? target.draw(m_particleSystem) : target.draw(m_particleSystem, m_particle.blendMode);
 	}
 }
