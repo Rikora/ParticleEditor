@@ -200,6 +200,14 @@ namespace px
 						m_playbackWatch.start();
 				}
 			}
+			ImGui::SameLine();
+			ImGui::TextDisabled("(?)");
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				ImGui::SetTooltip("Disabling looping will stop the simulation\nand allow the system to be played once");
+				ImGui::EndTooltip();
+			}
 			ImGui::Spacing();
 			ImGui::InputFloat("Duration", &m_particle.duration, 0.1f);
 			ImGui::Spacing();
@@ -243,6 +251,14 @@ namespace px
 					thor::FadeAnimation fader(m_particle.fader.x, m_particle.fader.y);
 					m_fadeConnection = m_particleSystem.addAffector(thor::AnimationAffector(fader));
 				}
+				ImGui::SameLine();
+				ImGui::TextDisabled("(?)");
+				if (ImGui::IsItemHovered())
+				{
+					ImGui::BeginTooltip();
+					ImGui::SetTooltip("Manipulates the alpha value during\nthe systems lifetime [0, 1]");
+					ImGui::EndTooltip();
+				}
 				ImGui::Spacing();
 			}
 			ImGui::Spacing();
@@ -255,6 +271,14 @@ namespace px
 				ImGui::Spacing();
 				if (ImGui::Checkbox("Use Polar Vector", &m_particle.velocityPolarVector))
 					m_particle.velocity = sf::Vector2f(0.f, 0.f);
+				ImGui::SameLine();
+				ImGui::TextDisabled("(?)");
+				if (ImGui::IsItemHovered())
+				{
+					ImGui::BeginTooltip();
+					ImGui::SetTooltip("Enabling this feature switches\nthe format to vel(radius, angle)");
+					ImGui::EndTooltip();
+				}
 				ImGui::Spacing();
 				ImGui::InputFloat2("Velocity", &m_particle.velocity.x, floatPrecision);
 				ImGui::Spacing();
