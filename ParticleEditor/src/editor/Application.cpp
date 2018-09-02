@@ -36,15 +36,16 @@ namespace px
 
 	Application::Application() : m_window(sf::VideoMode(1200U, 800U), "Particle Editor", sf::Style::Close,
 										  sf::ContextSettings(0U, 0U, 8U)), m_particlePath("particle.png"),
-										  m_fullParticlePath("src/res/textures/particle.png"), m_playing(true)
+										  m_playing(true)
 	{
 		m_window.setVerticalSyncEnabled(true);
 		ImGui::SFML::Init(m_window);
 
 		// Load texture
+		m_particle.fullParticlePath = "src/res/textures/particle.png";
 		m_playButtonTexture.loadFromFile("src/res/textures/icons/play_button.png");
 		m_pauseButtonTexture.loadFromFile("src/res/textures/icons/pause_button.png");
-		m_particle.texture.loadFromFile(m_fullParticlePath);
+		m_particle.texture.loadFromFile(m_particle.fullParticlePath);
 		m_playButton.setTexture(m_playButtonTexture);
 		m_pauseButton.setTexture(m_pauseButtonTexture);
 		m_textureButton.setTexture(m_particle.texture);
@@ -380,8 +381,8 @@ namespace px
 				ImGui::Spacing();
 				if (ImGui::ImageButton(m_textureButton, sf::Vector2f(100.f, 100.f), -1, sf::Color::Black, m_particle.color))
 				{
-					openTextureFile(m_fullParticlePath, m_particlePath);
-					m_particle.texture.loadFromFile(m_fullParticlePath);
+					openTextureFile(m_particle.fullParticlePath, m_particlePath);
+					m_particle.texture.loadFromFile(m_particle.fullParticlePath);
 					m_particleSystem.setTexture(m_particle.texture);
 					m_textureButton.setTexture(m_particle.texture);
 				}
@@ -500,7 +501,7 @@ namespace px
 		i >> data;
 				
 		// Data
-		m_fullParticlePath = data["texture"].get<std::string>();
+		m_particle.fullParticlePath = data["texture"].get<std::string>();
 		m_particle.looping = data["looping"].get<bool>();
 		m_particle.deflect = data["deflect"].get<bool>();
 		m_particle.enableTorqueAff = data["enableTorqueAff"].get<bool>();
@@ -538,8 +539,8 @@ namespace px
 			m_fadeConnection = m_particleSystem.addAffector(thor::AnimationAffector(fader));
 		}
 
-		//Set texture
-		m_particle.texture.loadFromFile(m_fullParticlePath);
+		// Set texture
+		m_particle.texture.loadFromFile(m_particle.fullParticlePath);
 		m_particleSystem.setTexture(m_particle.texture);
 		m_textureButton.setTexture(m_particle.texture);
 		m_color[0] = static_cast<float>(static_cast<float>(m_particle.color.r) / 255.f);
@@ -559,7 +560,7 @@ namespace px
 
 		// Data
 		json data = {
-			{ "texture", m_fullParticlePath },
+			{ "texture", m_particle.fullParticlePath },
 			{ "looping", m_particle.looping },
 			{ "deflect", m_particle.deflect },
 			{ "velPolarVector", m_particle.velocityPolarVector },

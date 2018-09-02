@@ -3,34 +3,25 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/BlendMode.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include <Thor/Particles.hpp>
-#include <Thor/Time/StopWatch.hpp>
+
+namespace sf
+{
+	class Color;
+}
 
 namespace px
 {
-	class Application
+	class ParticleLoader
 	{
 	public:
-		Application();
-		~Application();
+		ParticleLoader(const std::string & filePath, const sf::Vector2f & position);
+		~ParticleLoader() = default;
 
 	public:
-		void run();
-
-	private:
-		void pollEvents();
-		void update(sf::Time dt);
-		void updateParticles(sf::Time dt);
-		void updateGUI();
-		void render();
-		void openTextureFile(std::string & filePath, std::string & file);
-		void openParticleFile();
-		void saveParticleFile();
-		void loadParticleData(const std::string & filePath);
-		void outputParticleData(const std::string & filePath);
-
-	private:
 		struct Properties
 		{
 			bool looping = true;
@@ -61,23 +52,11 @@ namespace px
 		};
 
 	private:
-		sf::RenderWindow m_window;
-		std::string m_particlePath;
-		sf::Texture m_playButtonTexture, m_pauseButtonTexture;
-		sf::Sprite m_textureButton, m_playButton, m_pauseButton;
-		bool m_playing;
-		static int m_shapeItem;
-		static int m_blendItem;
-		static float m_color[3];
+		void loadParticleData(const std::string & filePath, const sf::Vector2f & position);
 
 	private:
 		Properties m_particle;
 		thor::ParticleSystem m_particleSystem;
 		thor::UniversalEmitter m_emitter;
-		thor::Connection m_emitterConnection;
-		thor::Connection m_fadeConnection;
-		thor::Connection m_torqueConnection;
-		thor::Connection m_forceConnection;
-		thor::StopWatch m_playbackWatch;
 	};
 }

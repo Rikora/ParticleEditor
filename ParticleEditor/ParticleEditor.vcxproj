@@ -23,10 +23,12 @@
     <ClCompile Include="src\imgui\imgui-SFML.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\loader\ParticleLoader.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\editor\Application.hpp" />
+    <ClInclude Include="src\loader\ParticleLoader.hpp" />
     <ClInclude Include="src\utils\Utility.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

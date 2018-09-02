@@ -13,6 +13,9 @@
     <Filter Include="Utility">
       <UniqueIdentifier>{1ae28072-9add-4004-a43b-abbdad10cbde}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Loader">
+      <UniqueIdentifier>{3d4dd9a7-769d-46ed-92b3-129bbea2913c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -30,6 +33,9 @@
     <ClCompile Include="src\editor\Application.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
+    <ClCompile Include="src\loader\ParticleLoader.cpp">
+      <Filter>Loader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\editor\Application.hpp">
@@ -37,6 +43,9 @@
     </ClInclude>
     <ClInclude Include="src\utils\Utility.hpp">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\loader\ParticleLoader.hpp">
+      <Filter>Loader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
