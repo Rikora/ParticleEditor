@@ -10,7 +10,10 @@ int main()
 	return 0;
 }
 
-//#include <SFML/Graphics.hpp>
+/// Usage example of integration
+//#include <SFML/Graphics/RenderWindow.hpp>
+//#include <SFML/Window/Event.hpp>
+//#include <SFML/System/Clock.hpp>
 //#include <loader/ParticleLoader.hpp>
 //
 //int main()
