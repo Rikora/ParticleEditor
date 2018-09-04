@@ -53,6 +53,10 @@ namespace px
 		};
 
 	public:
+		// Determine if the particle system has stopped playing
+		bool isConnected() const;
+
+	public:
 		void update(sf::Time dt);
 		virtual void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
@@ -63,5 +67,6 @@ namespace px
 		Properties m_particle;
 		thor::ParticleSystem m_particleSystem;
 		thor::UniversalEmitter m_emitter;
+		thor::Connection m_emitterConnection;
 	};
 }

@@ -95,8 +95,13 @@ namespace px
 		// Set texture and prepare emitter
 		m_particle.texture.loadFromFile(m_particle.fullParticlePath);
 		m_particleSystem.setTexture(m_particle.texture);
-		m_particle.looping ? m_particleSystem.addEmitter(thor::refEmitter(m_emitter)) : 
-							 m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration));
+		m_particle.looping ? m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter)) : 
+							 m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration));
+	}
+
+	bool ParticleLoader::isConnected() const
+	{
+		return m_emitterConnection.isConnected();
 	}
 
 	void ParticleLoader::update(sf::Time dt)
