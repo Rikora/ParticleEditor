@@ -60,7 +60,10 @@ int main()
     return 0;
 }
 ```
+## Remarks
 
+* The size of a particle is uniform and thus ranges from a particle size to another
+* Trying to manipulate a range input field with invalid input will cause the range to reset
 
 ## Dependencies
 
