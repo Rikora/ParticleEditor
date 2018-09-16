@@ -54,6 +54,17 @@ namespace px
 		// Apply the emitter and start playback time
 		m_emitterConnection = m_particleSystem.addEmitter(thor::refEmitter(m_emitter), sf::seconds(m_particle.duration)); 
 		m_playbackWatch.start();
+
+		// Supply actions to the action map
+		thor::Action eventClosed(sf::Event::Closed);
+		thor::Action close(sf::Keyboard::Escape, thor::Action::PressOnce);
+		thor::Action ctrl(sf::Keyboard::LControl, thor::Action::Hold);
+		thor::Action open(sf::Keyboard::O, thor::Action::PressOnce);
+		thor::Action save(sf::Keyboard::S, thor::Action::PressOnce);
+
+		m_actions["close"] = eventClosed || close;
+		m_actions["openFile"] = ctrl && open;
+		m_actions["saveFile"] = ctrl && save;
 	}
 
 	Application::~Application()
@@ -63,14 +74,22 @@ namespace px
 
 	void Application::pollEvents()
 	{
+		m_actions.clearEvents();
+
 		sf::Event event;
 		while (m_window.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
-
-			if (event.type == sf::Event::Closed || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
-				m_window.close();
+			m_actions.pushEvent(event);
 		}
+
+		// React to different action types
+		if (m_actions.isActive("close"))
+			m_window.close();
+		if (m_actions.isActive("openFile"))
+			openParticleFile();
+		if (m_actions.isActive("saveFile"))
+			saveParticleFile();
 	}
 
 	void Application::update(sf::Time dt)
@@ -483,6 +502,11 @@ namespace px
 		{
 			std::string filePath = savePath;
 			std::replace(filePath.begin(), filePath.end(), '\\', '/');
+
+			// Add .json as the file format if missing
+			if (filePath.find(".json") == std::string::npos)
+				filePath.append(".json");
+
 			outputParticleData(filePath);
 			printf("Saved file to: %s\n", savePath);
 			free(savePath);

@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 #include <loader/ParticleLoader.hpp>
 #include <Thor/Time/StopWatch.hpp>
+#include <Thor/Input/ActionMap.hpp>
 
 namespace px
 {
@@ -49,5 +50,6 @@ namespace px
 		thor::Connection m_torqueConnection;
 		thor::Connection m_forceConnection;
 		thor::StopWatch m_playbackWatch;
+		thor::ActionMap<std::string> m_actions;
 	};
 }
