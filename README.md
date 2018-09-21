@@ -1,4 +1,4 @@
-# ParticleEditor
+# Particle Editor
 
 Particle editor based on the [Thor](https://github.com/Bromeon/Thor) library extension to [SFML](https://github.com/SFML/SFML). 
 
